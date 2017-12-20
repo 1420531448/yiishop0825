@@ -12,7 +12,19 @@ return [
     'controllerNamespace' => 'backend\controllers',
     'bootstrap' => ['log'],
     'modules' => [],
+    'language'=>'zh-CN',
+    'defaultRoute'=>'brand/index',
     'components' => [
+      /*  //>>加载JQuery
+        'assetManager'=>[
+            'bundles'=>[
+                'yii\web\JqueryAsset'=>[
+                    'jsOptions'=>[
+                        'position'=>\yii\web\View::POS_READY,
+                    ]
+                ]
+            ]
+        ],*/
         'request' => [
             'csrfParam' => '_csrf-backend',
         ],
@@ -37,14 +49,14 @@ return [
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
-        /*
+
         'urlManager' => [
-            'enablePrettyUrl' => true,
-            'showScriptName' => false,
+            'enablePrettyUrl' => true,//url美化
+            'showScriptName' => false,//显示脚本文件名
             'rules' => [
             ],
         ],
-        */
+
     ],
     'params' => $params,
 ];
