@@ -10,10 +10,10 @@ class Brand extends ActiveRecord{
         return [
             //>>必填字段
           [
-              ['name','intro','imgFile','status'],'required'
+              ['name','intro','logo','status'],'required'
           ],
             //>>字段单独规则
-            ['imgFile','file','extensions'=>['jpg','gif','png'],'maxSize'=>4*1024*1024,'skipOnEmpty'=>false]
+
         ];
     }
 
@@ -21,7 +21,7 @@ class Brand extends ActiveRecord{
         return [
             'name'=>'品牌名',
             'intro'=>'简介',
-            'imgFile'=>'logo上传',
+            'logo'=>'logo上传',
             'status'=>'状态'
         ];
     }

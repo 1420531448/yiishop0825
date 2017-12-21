@@ -34,8 +34,9 @@ $js =
     <<<JS
     $('tr').on('click','.btn-warning',function() {
         var id = $('.btn-warning').closest('tr').attr('id');
-         $(this).closest('tr').remove();
+        
         if( confirm('是否删除')){
+             $(this).closest('tr').remove();
              $.getJSON('$url?id='+id,function(data) {
                 if(data){
                     alert('删除成功');
