@@ -4,7 +4,7 @@ namespace backend\controllers;
 use backend\models\Article;
 use backend\models\ArticleCategory;
 use backend\models\ArticleDetail;
-use common\widgets\ueditor\UeditorAction;
+use kucha\ueditor\UEditorAction;
 use yii\web\Controller;
 
 class ArticleController extends Controller{
@@ -83,13 +83,13 @@ class ArticleController extends Controller{
     {
         return [
             //>>富文本编辑器
-            'Ueditor'=>[
-                'class'=>UeditorAction::className(),
-                'config'=>[
-                    //>>上传图片配置
-                    'imageUrlPrefix'=>'',
-                    'imagePathFormat'=>'/image/{yyyy}{mm}{dd}/{time}{rand:6}'
-                ]
+            'upload'=>[
+                'class'=>UEditorAction::className(),
+          /*      'config' => [
+                    "imageUrlPrefix"  => "http://www.baidu.com",//图片访问路径前缀
+                    "imagePathFormat" => "/upload/image/{yyyy}{mm}{dd}/{time}{rand:6}" ,//上传保存路径
+                    "imageRoot" => \Yii::getAlias("@webroot"),
+            ],*/
             ]
         ];
     }

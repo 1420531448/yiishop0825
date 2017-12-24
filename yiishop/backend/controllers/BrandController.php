@@ -20,6 +20,7 @@ class BrandController extends Controller{
     //>>品牌添加
     public function actionAdd(){
        $model = new Brand();
+
        $request = \Yii::$app->request;
        if($request->isPost){
             $model->load($request->post());
