@@ -1,3 +1,10 @@
+<form action="" method="get">
+    货号:<input type="text" name="sn">
+    商品名:<input type="text" name="name">
+    最低价格<input type="text" name="price_low">
+    最高价格<input type="text" name="price_high">
+    <input type="submit" class="btn btn-info" value="搜索">
+</form>
 <table class="table table-bordered">
     <tr>
         <th>id</th>
@@ -22,7 +29,7 @@
         <td><?=$row->stock?></td>
         <td><?=$row->shop_price?></td>
         <td><?=$row->is_on_sale==1?'上架':'下架'?></td>
-        <td><a class="btn btn-info" href="<?=\yii\helpers\Url::to(['goods/gallery-display','id'=>$row->id])?>">相册</a><a class="btn btn-primary" href="<?=\yii\helpers\Url::to(['goods/edit','id'=>$row->id])?>">修改</a><a class="btn btn-warning">删除</a><a class="btn btn-default" href="<?=\yii\helpers\Url::to(['goods/view','id'=>$row->id])?>">预览</a></td>
+        <td><a class="btn btn-info"  href="<?=\yii\helpers\Url::to(['goods/gallery-display','id'=>$row->id])?>"><span class="glyphicon glyphicon-picture" aria-hidden="true"></span>相册</a><a class="btn btn-primary" href="<?=\yii\helpers\Url::to(['goods/edit','id'=>$row->id])?>">修改</a><a class="btn btn-warning">删除</a><a class="btn btn-default" href="<?=\yii\helpers\Url::to(['goods/view','id'=>$row->id])?>">预览</a></td>
 
     </tr>
     <?php endforeach;?>
@@ -30,13 +37,16 @@
         <td colspan="10" style="text-align: center"><a class="btn btn-info" href="<?=\yii\helpers\Url::to(['goods/add'])?>">添加商品</a></td>
     </tr>
 </table>
+<?=\yii\widgets\LinkPager::widget([
+        'pagination'=>$pageTool
+])?>
 <?php
 /**
  * @var $this \yii\web\View
  */
 $url = \yii\helpers\Url::to(['goods/delete']);
 $js = <<<JS
-    $('td').on('click','.btn-warning',function() {
+    $('table').on('click','.btn-warning',function() {
         var id = $(this).closest('tr').attr('id');
         var tr = $(this).closest('tr');
         if(confirm("确定删除?")){

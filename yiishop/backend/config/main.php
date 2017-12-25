@@ -13,7 +13,7 @@ return [
     'bootstrap' => ['log'],
     'modules' => [],
     'language'=>'zh-CN',
-    'defaultRoute'=>'brand/index',
+    'defaultRoute'=>'login/index',
     'components' => [
       /*  //>>加载JQuery
         'assetManager'=>[
@@ -29,7 +29,7 @@ return [
             'csrfParam' => '_csrf-backend',
         ],
         'user' => [
-            'identityClass' => 'common\models\User',
+            'identityClass' => 'backend\models\User',
             'enableAutoLogin' => true,
             'identityCookie' => ['name' => '_identity-backend', 'httpOnly' => true],
         ],

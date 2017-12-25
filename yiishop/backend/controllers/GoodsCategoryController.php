@@ -35,16 +35,29 @@ class GoodsCategoryController extends Controller{
     //>>商品分类修改
     public function actionEdit($id){
         $row = GoodsCategory::find()->where(['id'=>$id])->one();
+        $parent_id = $row->parent_id;
         $request = \Yii::$app->request;
+
         if($request->isPost){
-            if($row->load($request->post()) && $row->validate()){
-                $row->save();
+            $row->load($request->post());
+            if($row->validate()){
+                if($row->parent_id){
+                    //>>创建子节点
+                    $row->appendTo(GoodsCategory::find()->where(['id'=>$row->parent_id])->one());
+                }else{
+                    //>>创建根节点
+                    if($parent_id == 0){
+                        $row->save();
+                    }else{
+                        $row->makeRoot();
+                    }
+                }
                 \Yii::$app->session->setFlash('success','修改成功');
                 return $this->redirect(['goods-category/index']);
             }
-        }else{
-            return $this->render('update',['model'=>$row]);
         }
+        return $this->render('update',['model'=>$row]);
+
     }
     //>>商品分类删除
     public function actionDelete($id){

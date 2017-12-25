@@ -28,17 +28,42 @@ AppAsset::register($this);
 <div class="wrap">
     <?php
     NavBar::begin([
-        'brandLabel' => 'My Company',
+        'brandLabel' => '京西??',
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
             'class' => 'navbar-inverse navbar-fixed-top',
         ],
     ]);
     $menuItems = [
-        ['label' => 'Home', 'url' => ['/site/index']],
+        [
+            'label'=>'品牌管理',
+            'items'=>[
+                ['label' => '品牌列表', 'url' =>['/brand/index']],
+            ],
+        ],
+        [
+            'label'=>'商品管理',
+            'items'=>[
+                ['label'=>'商品列表','url'=>['goods/index']],
+                ['label'=>'商品分类列表','url'=>['goods-category/index']],
+            ]
+        ],
+        [
+            'label'=>'文章管理',
+            'items'=>[
+                ['label'=>'文章分类列表','url'=>['article-category/index']],
+                ['label'=>'文章列表','url'=>['article/index']]
+            ]
+        ],
+        [
+             'label'=>'用户管理',
+            'items'=>[
+                 ['label'=>'用户列表','url'=>['user/index']]
+            ]
+        ]
     ];
     if (Yii::$app->user->isGuest) {
-        $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
+        $menuItems[] = ['label' => '登陆', 'url' => '/login/index'];
     } else {
         $menuItems[] = '<li>'
             . Html::beginForm(['/site/logout'], 'post')

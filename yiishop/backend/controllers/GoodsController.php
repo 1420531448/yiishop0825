@@ -10,6 +10,7 @@ use backend\models\GoodsIntro;
 use kucha\ueditor\UEditorAction;
 use Qiniu\Auth;
 use Qiniu\Storage\UploadManager;
+use yii\data\Pagination;
 use yii\gii\console\GenerateAction;
 use yii\helpers\Json;
 use yii\web\Controller;
@@ -19,7 +20,33 @@ class GoodsController extends Controller{
     public $enableCsrfValidation=false;
     //>>商品列表展示
     public function actionIndex(){
-        $rows = Goods::find()->where(['>','status','0'])->orderBy('sn asc')->all();
+        $request = \Yii::$app->request;
+//        var_dump($request->get());die;
+            $query = Goods::find();
+            $sn = empty($request->get('sn'))?'':$request->get('sn');
+            $name = empty($request->get('name'))?'':$request->get('name');
+            $price_low = empty($request->get('price_low'))?'':$request->get('price_low');
+            $price_high = empty($request->get('price_high'))?'':$request->get('price_high');
+            if($sn){
+                $query->Where(['like','sn',$sn]);
+            }
+            if($name){
+                $query->andWhere(['like','name',$name]);
+            }
+            if($price_low){
+                $query->andWhere(['>','shop_price',$price_low]);
+            }
+            if($price_high){
+                $query->andWhere(['<','shop_price',$price_high]);
+            }
+             $total= $query->andWhere(['>=','status',0])->orderBy('sn asc')->count();
+            $pageTool = new Pagination([
+                'pageSize'=>4,
+                'totalCount'=>$total
+            ]);
+           $rows = $query->andWhere(['>=','status',0])->orderBy('sn asc')->limit($pageTool->limit)->offset($pageTool->offset)->all();
+
+
         $brands = Brand::find()->all();
         $goodCategorys = GoodsCategory::find()->all();
         $arrBrand = [];
@@ -30,7 +57,7 @@ class GoodsController extends Controller{
         foreach($goodCategorys as $goodCategory){
             $arrCategory[$goodCategory->id]=$goodCategory->name;
         }
-        return $this->render('index',['rows'=>$rows,'arrBrand'=>$arrBrand,'arrCategory'=>$arrCategory]);
+        return $this->render('index',['rows'=>$rows,'arrBrand'=>$arrBrand,'arrCategory'=>$arrCategory,'pageTool'=>$pageTool]);
     }
     //>>商品添加
     public function actionAdd(){
@@ -44,8 +71,6 @@ class GoodsController extends Controller{
         }
         //>>商品详情模型
         $content = new GoodsIntro();
-
-
         $request = \Yii::$app->request;
         //>>表单提交
         if($request->isPost){
@@ -209,6 +234,7 @@ class GoodsController extends Controller{
            $content =  GoodsIntro::find()->where(['goods_id'=>$id])->one();
            return $this->render('view',['content'=>$content,'pictures'=>$pictures]);
     }
+    //>>插件
     public function actions()
     {
         return [

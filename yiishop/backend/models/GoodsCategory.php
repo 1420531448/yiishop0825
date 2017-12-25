@@ -6,33 +6,30 @@ use creocoder\nestedsets\NestedSetsBehavior;
 use yii\helpers\Json;
 
 class GoodsCategory extends ActiveRecord{
-    //>>找儿子方法
-    private function getChildren(&$categorys,$parent_id,$deep=0){
-        //准备一个空数组,用于装找到的儿子
-        static $children = [];
-        //循环所有的分类数据,将每一条数据中的parent_id进行必须,
-        //等于我传入的$parent_id,就是我们需要的儿子
-        foreach ($categorys as $category){
-            if($category['parent_id'] == $parent_id){
-                //在每一个找到的儿子上保存一个字段表示缩进好的分类名称
-                $category['name_txt'] = str_repeat("&emsp;",$deep*2).$category['name'];
-                $children[] = $category;
-                //继续找,$category下可能还有子节点
-                $this->getChildren($categorys,$category['id'],$deep+1);
-            }
-        }
-        //返回儿子
-        return $children;
-    }
+
     public function rules()
     {
         return [
             [
                 ['name','parent_id','intro'],'required'
-            ]
+            ],
+            ['parent_id','validatePid'],
+
         ];
     }
+    //>>自定义验证规则
+    public function validatePid(){
+        $parent= GoodsCategory::find()->where(['id'=>$this->parent_id])->one();
 
+        if(!is_object($parent)){
+            return 0;
+        }else{
+            if($parent->isChildOf($this)){
+                $this->addError('parent_id','不能修改为子孙节点的子节点');
+            }
+        }
+
+    }
     public function attributeLabels()
     {
         return [
