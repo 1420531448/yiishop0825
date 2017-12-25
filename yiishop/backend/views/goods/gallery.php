@@ -85,7 +85,7 @@ $this->registerJs($js);
 <?php
 $url_delete = \yii\helpers\Url::to(['goods/gallery-delete']);
 $js_delete = <<<JS
-    $('td').on('click','.btn-warning',function() {
+    $('table').on('click','.btn-warning',function() {
         var id = $(this).closest('tr').attr('id');
         var tr = $(this).closest('tr');
        

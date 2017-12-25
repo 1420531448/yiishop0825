@@ -19,7 +19,7 @@ class GoodsController extends Controller{
     public $enableCsrfValidation=false;
     //>>商品列表展示
     public function actionIndex(){
-        $rows = Goods::find()->where(['>','status','0'])->all();
+        $rows = Goods::find()->where(['>','status','0'])->orderBy('sn asc')->all();
         $brands = Brand::find()->all();
         $goodCategorys = GoodsCategory::find()->all();
         $arrBrand = [];
@@ -202,6 +202,12 @@ class GoodsController extends Controller{
             }
 
         }
+    }
+    //>>内容展示
+    public function actionView($id){
+            $pictures = GoodsGallery::find()->where(['goods_id'=>$id])->all();
+           $content =  GoodsIntro::find()->where(['goods_id'=>$id])->one();
+           return $this->render('view',['content'=>$content,'pictures'=>$pictures]);
     }
     public function actions()
     {

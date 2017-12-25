@@ -22,7 +22,8 @@
         <td><?=$row->stock?></td>
         <td><?=$row->shop_price?></td>
         <td><?=$row->is_on_sale==1?'上架':'下架'?></td>
-        <td><a class="btn btn-info" href="<?=\yii\helpers\Url::to(['goods/gallery-display','id'=>$row->id])?>">相册</a><a class="btn btn-primary" href="<?=\yii\helpers\Url::to(['goods/edit','id'=>$row->id])?>">修改</a><a class="btn btn-warning">删除</a>预览</td>
+        <td><a class="btn btn-info" href="<?=\yii\helpers\Url::to(['goods/gallery-display','id'=>$row->id])?>">相册</a><a class="btn btn-primary" href="<?=\yii\helpers\Url::to(['goods/edit','id'=>$row->id])?>">修改</a><a class="btn btn-warning">删除</a><a class="btn btn-default" href="<?=\yii\helpers\Url::to(['goods/view','id'=>$row->id])?>">预览</a></td>
+
     </tr>
     <?php endforeach;?>
     <tr>

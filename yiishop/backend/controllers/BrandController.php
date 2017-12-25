@@ -99,7 +99,7 @@ class BrandController extends Controller{
         $row->status = -1;
 //        var_dump($row);die;
         $bool = $row->save(false);
-        echo $bool;
+        return $bool;
        /* \Yii::$app->session->setFlash('success','删除品牌成功');
         return $this->redirect(['brand/index']);*/
     }
