@@ -7,51 +7,44 @@ use yii\web\IdentityInterface;
 class User extends ActiveRecord implements IdentityInterface {
     public $oldPassword;
     public $verify_password;
-    public $code;
     public function rules()
     {
         return [
             [
-                ['username','password_hash','verify_password','email','status','code'],'required'
+                ['username','password_hash','verify_password','email','status'],'required'
             ],
             ['verify_password', 'compare', 'compareAttribute'=>'password_hash','message'=>'密码和确认密码必须相同'],
             ['email', 'email'],
-            ['code','captcha','captchaAction'=>'login/captcha']
+            ['oldPassword','default','value'=>null]
         ];
     }
     public function attributeLabels()
     {
         return [
           'username'=>'用户名',
-          'password_hash'=>'密码',
-          'verify_password'=>'确认密码',
-          'code'=>'验证码',
+          'password_hash'=>'新密码',
+          'oldPassword'=>'旧密码',
+          'verify_password'=>'确认新密码',
           'email'=>'邮箱',
           'status'=>'状态',
         ];
     }
-    //>>用户登陆验证方法
-    public function login(){
+
+    public function isSelf(){
+        //查出当前用户信息
         $user = User::find()->where(['username'=>$this->username])->one();
-        if($user){
-            //>>验证密码
-            if(\Yii::$app->security->validatePassword($this->password_hash,$user->password_hash)){
-                //>>密码正确
-                $user->last_login_time = time();
-                $user->last_login_ip = $_SERVER['REMOTE_ADDR'];
-                $user->save(false);
-                \Yii::$app->user->login($user);
+//        var_dump($this->oldPassword);die;
+        if($this->oldPassword){
+            if(\Yii::$app->security->validatePassword($this->oldPassword,$user->password_hash)){
                 return true;
             }else{
-                $this->addError('password_hash','密码错误');
+                $this->addError('oldPassword','原密码错误');
             }
-
         }else{
-            $this->addError('username','用户名不存在');
+            $this->addError('oldPassword','原密码不为空');
         }
         return false;
     }
-
     /**
      * Finds an identity by the given ID.
      * @param string|int $id the ID to be looked for
@@ -101,7 +94,7 @@ class User extends ActiveRecord implements IdentityInterface {
      */
     public function getAuthKey()
     {
-        // TODO: Implement getAuthKey() method.
+        return $this->auth_key;
     }
 
     /**
@@ -114,6 +107,6 @@ class User extends ActiveRecord implements IdentityInterface {
      */
     public function validateAuthKey($authKey)
     {
-        // TODO: Implement validateAuthKey() method.
+        return $this->getAuthKey()=== $authKey;
     }
 }

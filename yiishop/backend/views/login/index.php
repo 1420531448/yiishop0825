@@ -9,5 +9,6 @@ echo $form->field($model,'code')->widget(\yii\captcha\Captcha::className(),[
                     <div class="col-xs-1">{input}</div>
 </div>'
 ]);
+echo $form->field($model,'remember')->checkbox([1=>'已登录']);
 echo \yii\helpers\Html::submitButton('登陆',['class'=>'btn btn-info']);
 \yii\bootstrap\ActiveForm::end();

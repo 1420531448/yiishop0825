@@ -21,7 +21,7 @@
         <td><?=date('Y-m-d H:i:s',$row->updated_at)?></td>
         <td><?=date('Y-m-d H:i:s',$row->last_login_time)?></td>
         <td><?=$row->last_login_ip?></td>
-        <td><a class="btn btn-info" href="<?=\yii\helpers\Url::to(['user/edit','id'=>$row->id])?>">修改</a><a class="btn btn-warning">删除</a></td>
+        <td><!--<a class="btn btn-info" href="<?/*=\yii\helpers\Url::to(['user/edit','id'=>$row->id])*/?>">修改</a>--><a class="btn btn-warning">删除</a></td>
     </tr>
     <?php endforeach;?>
     <tr>
