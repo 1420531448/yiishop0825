@@ -7,6 +7,9 @@ use yii\web\IdentityInterface;
 class User extends ActiveRecord implements IdentityInterface {
     public $oldPassword;
     public $verify_password;
+    public $role;
+    const SCENARIO_ADD_USER = 'ADD_USER';
+    const SCENARIO_EDIT_USER = 'EDIT_USER';
     public function rules()
     {
         return [
@@ -15,7 +18,8 @@ class User extends ActiveRecord implements IdentityInterface {
             ],
             ['verify_password', 'compare', 'compareAttribute'=>'password_hash','message'=>'密码和确认密码必须相同'],
             ['email', 'email'],
-            ['oldPassword','default','value'=>null]
+            ['oldPassword','default','value'=>null],
+            ['role','required','on'=>[self::SCENARIO_ADD_USER,self::SCENARIO_EDIT_USER]],
         ];
     }
     public function attributeLabels()
@@ -27,6 +31,7 @@ class User extends ActiveRecord implements IdentityInterface {
           'verify_password'=>'确认新密码',
           'email'=>'邮箱',
           'status'=>'状态',
+            'role'=>'角色'
         ];
     }
 

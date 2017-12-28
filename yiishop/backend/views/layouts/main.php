@@ -59,7 +59,7 @@ AppAsset::register($this);
              'label'=>'用户管理',
             'items'=>[
                  ['label'=>'用户列表','url'=>['user/index']],
-                 ['label'=>'修改密码','url'=>['user/edit','id'=>Yii::$app->user->id]]
+                 ['label'=>'修改密码','url'=>['user/edit-own','id'=>Yii::$app->user->id]]
             ]
         ],
         [
