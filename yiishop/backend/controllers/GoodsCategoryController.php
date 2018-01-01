@@ -1,6 +1,7 @@
 <?php
 
 namespace backend\controllers;
+use backend\filter\RbacFilter;
 use backend\models\GoodsCategory;
 use yii\helpers\Json;
 use yii\web\Controller;
@@ -19,6 +20,7 @@ class GoodsCategoryController extends Controller{
         $model = new GoodsCategory();
         $request = \Yii::$app->request;
         if($request->isPost){
+//            var_dump($model);die;
             if($model->load($request->post()) && $model->validate()){
                 if(GoodsCategory::find()->where(['id'=>$model->parent_id])->one()){
                     $model->appendTo(GoodsCategory::find()->where(['id'=>$model->parent_id])->one());
@@ -73,5 +75,14 @@ class GoodsCategoryController extends Controller{
     //>>zTree测试
     public function actionTest(){
         return $this->renderPartial('test');
+    }
+    //>>权限管理
+    public function behaviors()
+    {
+        return [
+            'rbac'=>[
+                'class'=>RbacFilter::className()
+            ]
+        ];
     }
 }

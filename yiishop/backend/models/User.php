@@ -8,18 +8,23 @@ class User extends ActiveRecord implements IdentityInterface {
     public $oldPassword;
     public $verify_password;
     public $role;
+    //添加用户
     const SCENARIO_ADD_USER = 'ADD_USER';
+    //管理修改用户
     const SCENARIO_EDIT_USER = 'EDIT_USER';
+    //用户个人修改
+    const SCENARIO_EDIT_OWN = 'EDIT_USER_OWN';
     public function rules()
     {
         return [
             [
-                ['username','password_hash','verify_password','email','status'],'required'
+                ['username','password_hash','email','status'],'required'
             ],
             ['verify_password', 'compare', 'compareAttribute'=>'password_hash','message'=>'密码和确认密码必须相同'],
             ['email', 'email'],
             ['oldPassword','default','value'=>null],
-            ['role','required','on'=>[self::SCENARIO_ADD_USER,self::SCENARIO_EDIT_USER]],
+            ['role','default','value'=>null,'on'=>[self::SCENARIO_EDIT_USER,self::SCENARIO_ADD_USER]],
+            [['verify_password','password_hash'],'required','on'=>[self::SCENARIO_ADD_USER,self::SCENARIO_EDIT_OWN]]
         ];
     }
     public function attributeLabels()
@@ -113,5 +118,39 @@ class User extends ActiveRecord implements IdentityInterface {
     public function validateAuthKey($authKey)
     {
         return $this->getAuthKey()=== $authKey;
+    }
+    public function getMenus(){
+        $menuItems = [];
+        $menus = Menu::find()->where(['p_id'=>0])->all();
+
+        //>>找顶级分类
+        foreach($menus as $menu){
+            $items = Menu::find()->where(['p_id'=>$menu->id])->all();
+            $i=[];
+
+                //>>找子类
+                foreach ($items as $item){
+                    if(\Yii::$app->user->can($item->route)){
+                    // ['label'=>'用户列表','url'=>['user/index']],
+                    $i[]=['label'=>$item->name,'url'=>[$item->route]];
+                }
+
+            }
+            if($i){
+                $menuItems[]=['label'=>$menu->name,'items'=>$i];
+            }
+
+
+        }
+        return $menuItems;
+
+      /*  $menuItems = [
+            [
+                'label'=>'用户管理',
+                'items'=>[
+                    ['label'=>'用户列表','url'=>['user/index']],
+                    ['label'=>'修改密码','url'=>['user/edit-own','id'=>Yii::$app->user->id]]
+                ]
+            ],*/
     }
 }

@@ -1,6 +1,7 @@
 <?php
 namespace frontend\controllers;
 
+use backend\models\GoodsCategory;
 use Yii;
 use yii\base\InvalidParamException;
 use yii\web\BadRequestHttpException;
@@ -72,7 +73,21 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        $tops = GoodsCategory::find()->where(['parent_id'=>0])->all();
+        $two=[];
+        //>>获取顶级分类id
+        foreach($tops as $top){
+            $seconds = GoodsCategory::find()->where(['parent_id'=>$top->id])->all();
+            //>>根据顶级分类id存二级分类
+            $two[$top->id]= $seconds;
+
+            foreach ($seconds as $second){
+                $thirds =GoodsCategory::find()->where(['parent_id'=>$second->id])->all();
+                //>>根据二级分类id存3级分类
+               $three[$second->id]=$thirds;
+            }
+        }
+        return $this->render('index',['tops'=>$tops,'seconds'=>$two,'thirds'=>$three]);
     }
 
     /**

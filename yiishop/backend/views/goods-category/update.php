@@ -45,7 +45,6 @@ $js = <<<JS
             zTreeObj.expandAll(true);
             //>>节点选中回显
                 //>>获取该节点
-             
              var node = zTreeObj.getNodeByParam('id',$id,null);
              zTreeObj.selectNode(node);
 JS;

@@ -28,62 +28,44 @@ AppAsset::register($this);
 <div class="wrap">
     <?php
     NavBar::begin([
-        'brandLabel' => '京西??',
+        'brandLabel' => '天狗商城后台管理系统',
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
             'class' => 'navbar-inverse navbar-fixed-top',
         ],
     ]);
+
+    /*//var_dump($menuItems);die;
     $menuItems = [
         [
-            'label'=>'品牌管理',
+             'label'=>'个人中心',
             'items'=>[
-                ['label' => '品牌列表', 'url' =>['/brand/index']],
-            ],
-        ],
-        [
-            'label'=>'商品管理',
-            'items'=>[
-                ['label'=>'商品列表','url'=>['goods/index']],
-                ['label'=>'商品分类列表','url'=>['goods-category/index']],
-            ]
-        ],
-        [
-            'label'=>'文章管理',
-            'items'=>[
-                ['label'=>'文章分类列表','url'=>['article-category/index']],
-                ['label'=>'文章列表','url'=>['article/index']]
-            ]
-        ],
-        [
-             'label'=>'用户管理',
-            'items'=>[
-                 ['label'=>'用户列表','url'=>['user/index']],
                  ['label'=>'修改密码','url'=>['user/edit-own','id'=>Yii::$app->user->id]]
             ]
         ],
-        [
-              'label'=>'BRAC',
-              'items'=>[
-                  ['label'=>'权限列表','url'=>['rbac/permission-index']],
-                  ['label'=>'权限添加','url'=>['rbac/permission-add']],
-                  ['label'=>'角色列表','url'=>['rbac/role-index']],
-                  ['label'=>'角色添加','url'=>['rbac/role-add']],
-
-              ]
-        ]
-    ];
+    ];*/
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => '登陆', 'url' => '/login/index'];
     } else {
+        $menuItems=Yii::$app->user->identity->getMenus();
+//        var_dump($menuItems);die;
         $menuItems[] = '<li>'
             . Html::beginForm(['/site/logout'], 'post')
             . Html::submitButton(
-                'Logout (' . Yii::$app->user->identity->username . ')',
+                '注销 (' . Yii::$app->user->identity->username . ')',
                 ['class' => 'btn btn-link logout']
             )
             . Html::endForm()
             . '</li>';
+        $menuItems[] = '<li>'
+            . Html::beginForm(['/user/edit-own','id'=>Yii::$app->user->identity->id], 'get')
+            . Html::submitButton(
+                '个人密码修改',
+                ['class' => 'btn btn-link logout']
+            )
+            . Html::endForm()
+            . '</li>';
+
     }
     echo Nav::widget([
         'options' => ['class' => 'navbar-nav navbar-right'],

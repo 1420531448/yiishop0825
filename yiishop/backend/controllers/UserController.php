@@ -1,12 +1,14 @@
 <?php
 
 namespace backend\controllers;
+use backend\filter\RbacFilter;
 use backend\models\User;
 use yii\filters\AccessControl;
 use yii\helpers\Json;
 use yii\web\Controller;
 
 class UserController extends Controller{
+    public $enableCsrfValidation = false;
     //>>管理员列表展示
     public function actionIndex(){
         $rows = User::find()->where(['>','status',0])->all();
@@ -39,21 +41,25 @@ class UserController extends Controller{
                 $model->updated_at=time();
 
                 $model->save(false);
-                foreach($model->role as $role){
-                    $role = $auth->getRole($role);
-                    $auth->assign($role,$model->id);
+                if($model->role){
+                    foreach($model->role as $role){
+                        //>>角色名
+                        $role = $auth->getRole($role);
+                        $auth->assign($role,$model->id);
+                    }
                 }
+
                 \Yii::$app->session->setFlash('success','添加成功');
                 return $this->redirect(['user/index']);
             }
         }
         return $this->render('add',['model'=>$model,'r'=>$r]);
     }
-    //>>管理员修改
+    //>>本人修改密码
     public function actionEditOwn($id){
         $request = \Yii::$app->request;
         $row = User::find()->where(['id'=>$id])->one();
-
+        $row->scenario = User::SCENARIO_EDIT_OWN;
         $row->password_hash = '';
         if($request->isPost){
             $row->load($request->post());
@@ -88,7 +94,7 @@ class UserController extends Controller{
         }
     }
     //>>管理员修改用户信息
-    public function actionAdminEdit($id){
+    public function actionAdminEdit( $id){
         //修改用户角色
         $auth = \Yii::$app->authManager;
         $roles = $auth->getRoles();
@@ -107,24 +113,23 @@ class UserController extends Controller{
         }
         $row->role = $v;
         //var_dump($v);die;
-        $row->password_hash = '';
         $request = \Yii::$app->request;
         if($request->isPost){
             $row->load($request->post());
             if($row->validate()){
-                if( $row->verify_password == $row->password_hash ){
-                    //将密码设为加盐加密
-                    $password_hash = \Yii::$app->security->generatePasswordHash($row->password_hash);
-                    $row->password_hash = $password_hash;
-                }
-//                var_dump($row->role);die;
+
                 $row->updated_at = time();
                 $row->save(false);
+                //>>清空所有角色
                 $auth->revokeAll($row->id);
-                foreach ($row->role as $role){
-                    $role = $auth->getRole($role);
-                    $auth->assign($role,$row->id);
+                if($row->role){
+
+                    foreach ($row->role as $role){
+                        $role = $auth->getRole($role);
+                        $auth->assign($role,$row->id);
+                    }
                 }
+
 
                 \Yii::$app->session->setFlash('success','修改成功');
                 return $this->redirect(['user/index']);
@@ -132,25 +137,21 @@ class UserController extends Controller{
         }
          return  $this->render('admin-edit',['row'=>$row,'r'=>$r]);
     }
-    //>>权限
+    //>>管理员重置用户密码
+    public function actionResetPwd($id){
+        $row = User::find()->where(['id'=>$id])->one();
+        $row->password_hash = '123456';
+        $row->password_hash = \Yii::$app->security->generatePasswordHash($row->password_hash);
+        $res = $row->save(false);
+        echo $res;
+    }
+    //>>权限管理
     public function behaviors()
     {
         return [
-            'acf'=>[
-                'class'=>AccessControl::className(),
-                'rules'=>[
-                    [
-                        'allow'=>true,
-                        'actions'=>['index'],
-                        'roles'=>['?','@']
-                    ],
-                    [
-                        'allow'=>true,
-                        'actions'=>['add','edit-own','delete','admin-edit'],
-                        'roles'=>['@'],
-                    ]
-                ],
-            ],
+            'rbac'=>[
+                'class'=>RbacFilter::className()
+            ]
         ];
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 namespace backend\controllers;
+use backend\filter\RbacFilter;
 use backend\models\Article;
 use backend\models\ArticleCategory;
 use backend\models\ArticleDetail;
@@ -90,6 +91,15 @@ class ArticleController extends Controller{
                     "imagePathFormat" => "/upload/image/{yyyy}{mm}{dd}/{time}{rand:6}" ,//上传保存路径
                     "imageRoot" => \Yii::getAlias("@webroot"),
             ],*/
+            ]
+        ];
+    }
+    //>>权限管理
+    public function behaviors()
+    {
+        return [
+            'rbac'=>[
+                'class'=>RbacFilter::className()
             ]
         ];
     }

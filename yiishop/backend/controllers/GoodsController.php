@@ -1,6 +1,7 @@
 <?php
 
 namespace backend\controllers;
+use backend\filter\RbacFilter;
 use backend\models\Brand;
 use backend\models\Goods;
 use backend\models\GoodsCategory;
@@ -246,6 +247,14 @@ class GoodsController extends Controller{
                           "imagePathFormat" => "/upload/image/{yyyy}{mm}{dd}/{time}{rand:6}" ,//上传保存路径
                           "imageRoot" => \Yii::getAlias("@webroot"),
                   ],*/
+            ]
+        ];
+    }
+    public function behaviors()
+    {
+        return [
+            'rbac'=>[
+                'class'=>RbacFilter::className()
             ]
         ];
     }

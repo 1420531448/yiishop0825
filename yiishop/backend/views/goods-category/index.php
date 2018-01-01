@@ -15,7 +15,6 @@
         <td><?=$row->intro?></td>
         <td><?=$row->parent_id?></td>
         <td><a class="btn btn-info" href="<?=\yii\helpers\Url::to(['goods-category/edit','id'=>$row->id])?>">修改</a><a class="btn btn-warning">删除</a></td>
-
     </tr>
     <?php endforeach;?>
     <tr>

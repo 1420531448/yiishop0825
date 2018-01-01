@@ -55,13 +55,13 @@ $this->registerJs($js);
     </thead>
     <tbody>
     <?php foreach ($rows as $row):?>
-        <tr>
+        <tr id="<?=$row->name?>">
             <td><?=$row->name?></td>
             <td><?=$row->type==1?'角色':'权限'?></td>
             <td><?=$row->description?></td>
             <td><?=date('Y-m-d H:i:s',$row->createdAt)?></td>
             <td><?=date('Y-m-d H:i:s',$row->updatedAt)?></td>
-            <td><a class="btn btn-info" href="<?=\yii\helpers\Url::to(['rbac/permission-edit','name'=>$row->name])?>">修改</a><a class="btn btn-warning" href="<?=\yii\helpers\Url::to(['rbac/permission-delete','name'=>$row->name])?>">删除</a></td>
+            <td><a class="btn btn-info" href="<?=\yii\helpers\Url::to(['rbac/permission-edit','name'=>$row->name])?>">修改</a><a class="btn btn-warning" >删除</a></td>
         </tr>
     <?php endforeach;?>
 
@@ -70,4 +70,28 @@ $this->registerJs($js);
         <td style="text-align: center" colspan="6"><a class="btn btn-primary" href="<?=\yii\helpers\Url::to(['rbac/permission-add'])?>">添加</a></td>
     </tr>
 </table>
+<?php
+/**
+ * @var $this \yii\web\View
+ *
+ */
+$url = \yii\helpers\Url::to(['rbac/permission-delete']);
+$js_delete = <<<JS
+        $('table').on('click','.btn-warning',function() {
+                var name = $(this).closest('tr').attr('id');
+                var tr = $(this).closest('tr');
+               
+                if(confirm('是否删除?')){
+                    $.getJSON('{$url}?name='+name,function(data) {
+                            if(data){
+                                tr.remove();
+                                alert('删除成功');
+                            }else{
+                                alert('删除失败');
+                            }
+                    })
+                }
+        })
+JS;
+$this->registerJs($js_delete);
 

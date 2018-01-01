@@ -1,6 +1,7 @@
 <?php
 
 namespace backend\controllers;
+use backend\filter\RbacFilter;
 use backend\models\PermissionForm;
 use backend\models\RoleForm;
 use yii\rbac\Permission;
@@ -71,9 +72,10 @@ class RbacController extends Controller{
     public function actionPermissionDelete($name){
         $authManage = \Yii::$app->authManager;
         $permission = $authManage->getPermission($name);
-        $authManage->remove($permission);
+        $res = $authManage->remove($permission);
+        echo json_encode($res);
         \Yii::$app->session->setFlash('success','路由删除成功');
-        $this->redirect(['rbac/permission-index']);
+
     }
     
     //>>角色的增删改查
@@ -178,13 +180,22 @@ class RbacController extends Controller{
     public function actionRoleDelete($name){
         $auth = \Yii::$app->authManager;
         $role = $auth->getRole($name);
-        $auth->remove($role);
+        $res = $auth->remove($role);
+        echo json_encode($res);
         \Yii::$app->session->setFlash('success','角色删除成功');
-        $this->redirect(['rbac/role-index']);
+
     }
-    //>>权限和角色关联
     //>>
     public function actionTable(){
         return $this->render('test');
+    }
+    //>>权限管理
+    public function behaviors()
+    {
+        return [
+            'rbac'=>[
+                'class'=>RbacFilter::className()
+            ]
+        ];
     }
 }
