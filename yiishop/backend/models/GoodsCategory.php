@@ -69,5 +69,41 @@ class GoodsCategory extends ActiveRecord{
         array_unshift($res,['id'=>0,'name'=>'【顶级分类】','parent_id'=>0]);
         return Json::encode($res);
     }
+    //>>前台分类展示
+    public static function CategoryShow(){
+        $redis = new \Redis();
+        $redis->connect('127.0.0.1');
+        $html = $redis->get('goods_Category');
+//        $redis->del('goods_Category');die;
+        if(!$html){
+            $tops = GoodsCategory::find()->where(['parent_id'=>0])->all();
+            foreach($tops as $k1=>$top){
+                $html.='<div class="cat '.($k1==0?'item1':'').'">';
+                $html.='<h3><a href="'.\yii\helpers\Url::to(['goods-list/display','id'=>$top->id]).'">'.$top->name.'</a><b></b></h3>';
+                $seconds = GoodsCategory::find()->where(['parent_id'=>$top->id])->all();
+                $two[$top->id]= $seconds;
+                $html.='   <div class="cat_detail">';
+                foreach ($two[$top->id] as $k2=>$second){
+                    $html.=   '<dl '.($k2==0?'class="dl_1st"':'').'>';
+                    $html.=' <dt><a href="'.\yii\helpers\Url::to(['goods-list/display','id'=>$second->id]).'">'.$second->name.'</a></dt>';
+                    $thirds =GoodsCategory::find()->where(['parent_id'=>$second->id])->all();
+                    $three[$second->id]=$thirds;
+                    foreach($three[$second->id] as $third){
+                        $html.='<dd>';
+                        $html.='<a href="'.\yii\helpers\Url::to(['goods-list/display','id'=>$third->id]).'">'.$third->name.'</a>';
+                        $html.='</dd>';
+                    }
+                    $html.=' </dl>';
+                }
+                $html.='</div>';
+
+                $html.='</div>';
+            }
+            $redis->set('goods_Category',$html,24*3600);
+        }
+
+
+        return $html;
+    }
 
 }

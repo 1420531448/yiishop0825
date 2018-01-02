@@ -18,15 +18,20 @@ class GoodsCategoryController extends Controller{
     //>>商品分类添加
     public function actionAdd(){
         $model = new GoodsCategory();
+        $redis = new \Redis();
+        $redis->connect('127.0.0.1');
         $request = \Yii::$app->request;
         if($request->isPost){
 //            var_dump($model);die;
             if($model->load($request->post()) && $model->validate()){
                 if(GoodsCategory::find()->where(['id'=>$model->parent_id])->one()){
+                    //>>追加一个子孙节点
                     $model->appendTo(GoodsCategory::find()->where(['id'=>$model->parent_id])->one());
                 }else{
+                    //>>生成一个新节点
                     $model->makeRoot();
                 }
+                $redis->del('goods_Category');
                 \Yii::$app->session->setFlash('success','添加成功');
                 return $this->redirect(['goods-category/index']);
             }
@@ -36,6 +41,8 @@ class GoodsCategoryController extends Controller{
     }
     //>>商品分类修改
     public function actionEdit($id){
+        $redis = new \Redis();
+        $redis->connect('127.0.0.1');
         $row = GoodsCategory::find()->where(['id'=>$id])->one();
         $parent_id = $row->parent_id;
         $request = \Yii::$app->request;
@@ -54,6 +61,7 @@ class GoodsCategoryController extends Controller{
                         $row->makeRoot();
                     }
                 }
+                $redis->del('goods_Category');
                 \Yii::$app->session->setFlash('success','修改成功');
                 return $this->redirect(['goods-category/index']);
             }

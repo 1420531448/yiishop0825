@@ -23,7 +23,8 @@
         </div>
         <div class="topnav_right fr">
             <ul>
-                <li>您好，欢迎来到京西！[<a href="login.html">登录</a>] [<a href="register.html">免费注册</a>] </li>
+               <!-- /*=Yii::$app->user->identity->username==true?Yii::$app->user->identity->username:'您好'*/?>-->
+                <li><??>欢迎来到京西！[<a href="<?=\yii\helpers\Url::to(['member/logout'])?>">注销</a>][<a href="<?=\yii\helpers\Url::to(['member/login'])?>">登录</a>] [<a href="<?=\yii\helpers\Url::to(['member/regist'])?>">免费注册</a>] </li>
                 <li class="line">|</li>
                 <li>我的订单</li>
                 <li class="line">|</li>
@@ -138,25 +139,7 @@
             <div class="cat_bd">
 
 
-                <?php foreach($tops as $top):?>
-                <div class="cat item1">
-                    <h3><a href=""><?=$top->name?></a> <b></b></h3>
-
-                    <div class="cat_detail">
-                        <?php foreach ($seconds[$top->id] as $second):?>
-                        <dl class="dl_1st">
-                            <dt><a href=""><?=$second->name?></a></dt>
-                            <?php foreach($thirds[$second->id] as $third):?>
-                            <dd>
-                                <a href="<?=\yii\helpers\Url::to(['goods-list/index','id'=>$third->id])?>"><?=$third->name?></a>
-                            </dd>
-                            <?php endforeach;?>
-                        </dl>
-                        <?php endforeach;?>
-                    </div>
-
-                </div>
-                <?php endforeach;?>
+                <?=\backend\models\GoodsCategory::CategoryShow()?>
 
             </div>
 

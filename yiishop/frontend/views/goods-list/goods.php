@@ -556,8 +556,8 @@
             <!-- 图片预览区域 start -->
             <div class="preview fl">
                 <div class="midpic">
-                    <a href="/images/preview_l1.jpg" class="jqzoom" rel="gal1">   <!-- 第一幅图片的大图 class 和 rel属性不能更改 -->
-                        <img src="/images/preview_m1.jpg" alt="" />               <!-- 第一幅图片的中图 -->
+                    <a href="<?=$row->logo?>" class="jqzoom" rel="gal1">   <!-- 第一幅图片的大图 class 和 rel属性不能更改 -->
+                        <img src="<?=$row->logo?>" width="300px" alt="" />               <!-- 第一幅图片的中图 -->
                     </a>
                 </div>
 
@@ -569,46 +569,17 @@
                     <div class="smallpic_wrap">
                         <ul>
                             <li class="cur">
-                                <a class="zoomThumbActive" href="javascript:void(0);" rel="{gallery: 'gal1', smallimage: 'images/preview_m1.jpg',largeimage: 'images/preview_l1.jpg'}"><img src="/images/preview_s1.jpg"></a>
+                                <a class="zoomThumbActive" href="javascript:void(0);" rel="{gallery: 'gal1', smallimage: '<?=$row->logo?>',largeimage: '<?=$row->logo?>'}"><img src="<?=$row->logo?>" ></a>
                             </li>
+
+
+                            <?php foreach($gallerys as $gallery):?>
                             <li>
-                                <a href="javascript:void(0);" rel="{gallery: 'gal1', smallimage: 'images/preview_m2.jpg',largeimage: 'images/preview_l2.jpg'}"><img src="/images/preview_s2.jpg"></a>
+                                <a href="javascript:void(0);" rel="{gallery: 'gal1', smallimage: '<?=$gallery->path?>',largeimage: '<?=$gallery->path?>'}"><img src="<?=$gallery->path?>" ></a>
                             </li>
-                            <li>
-                                <a href="javascript:void(0);"
-                                   rel="{gallery: 'gal1', smallimage: 'images/preview_m3.jpg',largeimage: 'images/preview_l3.jpg'}">
-                                    <img src="/images/preview_s3.jpg"></a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0);"
-                                   rel="{gallery: 'gal1', smallimage: 'images/preview_m4.jpg',largeimage: 'images/preview_l4.jpg'}">
-                                    <img src="/images/preview_s4.jpg"></a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0);"
-                                   rel="{gallery: 'gal1', smallimage: 'images/preview_m5.jpg',largeimage: 'images/preview_l5.jpg'}">
-                                    <img src="/images/preview_s5.jpg"></a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0);"
-                                   rel="{gallery: 'gal1', smallimage: 'images/preview_m6.jpg',largeimage: 'images/preview_l6.jpg'}">
-                                    <img src="/images/preview_s6.jpg"></a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0);"
-                                   rel="{gallery: 'gal1', smallimage: 'images/preview_m7.jpg',largeimage: 'images/preview_l7.jpg'}">
-                                    <img src="/images/preview_s7.jpg"></a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0);"
-                                   rel="{gallery: 'gal1', smallimage: 'images/preview_m8.jpg',largeimage: 'images/preview_l8.jpg'}">
-                                    <img src="/images/preview_s8.jpg"></a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0);"
-                                   rel="{gallery: 'gal1', smallimage: 'images/preview_m9.jpg',largeimage: 'images/preview_l9.jpg'}">
-                                    <img src="/images/preview_s9.jpg"></a>
-                            </li>
+                            <?php endforeach;?>
+
+
                         </ul>
                     </div>
 
@@ -682,9 +653,9 @@
                         <!-- 此处的内容 一般是通过在线编辑器添加保存到数据库，然后直接从数据库中读出 -->
                         <?php foreach($gallerys as $gallery):?>
                         <img src="<?=$gallery->path?>" alt="" />
-                        <p style="height:10px;"> <?=$intro->content?></p>
+                        <p style="height:10px;"> </p>
                         <?php endforeach;?>
-
+                        <?=$intro->content?>
 
                     </div>
                 </div>

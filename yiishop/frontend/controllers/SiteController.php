@@ -71,9 +71,10 @@ class SiteController extends Controller
      *
      * @return mixed
      */
+
     public function actionIndex()
     {
-        $tops = GoodsCategory::find()->where(['parent_id'=>0])->all();
+        /*$tops = GoodsCategory::find()->where(['parent_id'=>0])->all();
         $two=[];
         //>>获取顶级分类id
         foreach($tops as $top){
@@ -84,10 +85,10 @@ class SiteController extends Controller
             foreach ($seconds as $second){
                 $thirds =GoodsCategory::find()->where(['parent_id'=>$second->id])->all();
                 //>>根据二级分类id存3级分类
-               $three[$second->id]=$thirds;
+                $three[$second->id]=$thirds;
             }
-        }
-        return $this->render('index',['tops'=>$tops,'seconds'=>$two,'thirds'=>$three]);
+        }*/
+        return $this->render('index');
     }
 
     /**

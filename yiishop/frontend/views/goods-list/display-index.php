@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/style/common.css" type="text/css">
     <link rel="stylesheet" href="/style/bottomnav.css" type="text/css">
     <link rel="stylesheet" href="/style/footer.css" type="text/css">
+    <!--<link rel="stylesheet" href="/assets/fbe0effa/css/bootstrap.css" type="text/css">-->
 
     <script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
     <script type="text/javascript" src="/js/header.js"></script>
@@ -688,38 +689,30 @@
 
         <!-- 商品列表 start-->
         <div class="goodslist mt10">
+            <?php foreach($rows as $row):?>
             <ul>
-                <?php foreach($rows as $row):?>
                 <li>
                     <dl>
                         <dt><a href="<?=\yii\helpers\Url::to(['goods-list/good-display','id'=>$row->id])?>"><img src="<?=$row->logo?>" alt="" /></a></dt>
                         <dd><a href="<?=\yii\helpers\Url::to(['goods-list/good-display','id'=>$row->id])?>"><?=$row->name?></a></dt>
-                        <dd><strong><?=$row->shop_price?></strong></dt>
+                        <dd><strong>￥<?=$row->shop_price?></strong></dt>
                         <dd><a href=""><em>已有10人评价</em></a></dt>
                     </dl>
                 </li>
-                <?php endforeach;?>
-
             </ul>
+            <?php endforeach;?>
         </div>
         <!-- 商品列表 end-->
 
         <!-- 分页信息 start -->
-        <div class="page mt20">
-            <a href="">首页</a>
-            <a href="">上一页</a>
-            <a href="">1</a>
-            <a href="">2</a>
-            <a href="" class="cur">3</a>
-            <a href="">4</a>
-            <a href="">5</a>
-            <a href="">下一页</a>
-            <a href="">尾页</a>&nbsp;&nbsp;
-            <span>
-					<em>共8页&nbsp;&nbsp;到第 <input type="text" class="page_num" value="3"/> 页</em>
-					<a href="" class="skipsearch" href="javascript:;">确定</a>
-				</span>
-        </div>
+        <?php
+
+        echo \yii\widgets\LinkPager::widget([
+            'pagination'=>$pagination,
+            'nextPageLabel' => '下一页',
+            'prevPageLabel' => '上一页',
+
+        ])?>
         <!-- 分页信息 end -->
 
     </div>
