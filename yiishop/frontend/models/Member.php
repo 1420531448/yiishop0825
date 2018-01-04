@@ -5,10 +5,12 @@ use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
 
 class Member extends ActiveRecord implements IdentityInterface {
+    public $checkcode;
     public function rules()
     {
         return [
-            [['username','password_hash','email'],'required']
+            [['username','password_hash','email','tel'],'required'],
+            ['checkcode','captcha','captchaAction'=>'member/captcha']
         ];
     }
 
@@ -61,7 +63,7 @@ class Member extends ActiveRecord implements IdentityInterface {
      */
     public function getAuthKey()
     {
-        // TODO: Implement getAuthKey() method.
+        return $this->auth_key;
     }
 
     /**
@@ -74,6 +76,6 @@ class Member extends ActiveRecord implements IdentityInterface {
      */
     public function validateAuthKey($authKey)
     {
-        // TODO: Implement validateAuthKey() method.
+        return $this->getAuthKey()===$authKey;
     }
 }

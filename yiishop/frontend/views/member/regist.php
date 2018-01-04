@@ -1,3 +1,5 @@
+<?php $this->context->layout='header-top';?>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
@@ -11,23 +13,7 @@
 </head>
 <body>
 <!-- 顶部导航 start -->
-<div class="topnav">
-    <div class="topnav_bd w990 bc">
-        <div class="topnav_left">
 
-        </div>
-        <div class="topnav_right fr">
-            <ul>
-                <li>您好，欢迎来到京西！[<a href="login.html">登录</a>] [<a href="register.html">免费注册</a>] </li>
-                <li class="line">|</li>
-                <li>我的订单</li>
-                <li class="line">|</li>
-                <li>客户服务</li>
-
-            </ul>
-        </div>
-    </div>
-</div>
 <!-- 顶部导航 end -->
 
 <div style="clear:both;"></div>
@@ -70,21 +56,21 @@
                         <input type="text" class="txt" name="email" />
                         <p>邮箱必须合法</p>
                     </li>
-                   <!-- <li>
+                    <li>
                         <label for="">手机号码：</label>
                         <input type="text" class="txt" value="" name="tel" id="tel" placeholder=""/>
-                    </li>-->
-                   <!-- <li>
-                        <label for="">验证码：</label>
-                        <input type="text" class="txt" value="" placeholder="请输入短信验证码" name="captcha" disabled="disabled" id="captcha"/> <input type="button" onclick="bindPhoneNum(this)" id="get_captcha" value="获取验证码" style="height: 25px;padding:3px 8px"/>
+                    </li>
+                    <li>
+                        <label for="">手机验证码：</label>
+                        <input type="text" class="txt" value="" placeholder="请输入短信验证码" name="captcha"  id="captcha"/> <input type="button" onclick="bindPhoneNum(this)" id="get_captcha" value="获取验证码" style="height: 25px;padding:3px 8px"/>
 
-                    </li>-->
-                  <!--  <li class="checkcode">
+                    </li>
+                    <li class="checkcode">
                         <label for="">验证码：</label>
-                        <input type="text"  name="checkcode" />
-                        <img src="/images/checkcode1.jpg" alt="" />
-                        <span>看不清？<a href="">换一张</a></span>
-                    </li>-->
+                        <input type="text"  name="checkcode" id="checkcode" />
+                        <img id="captcha_img" src="" alt="" />
+                        <span>看不清？<a id="change_captcha" href="javascript:">换一张</a></span>
+                    </li>
 
                     <li>
                         <label for="">&nbsp;</label>
@@ -159,7 +145,26 @@
 
             $('#get_captcha').val(html);
         },1000);
+        var phone = $('#tel').val();
+       $.get("<?=\yii\helpers\Url::to(['member/send-sms'])?>",{tel:phone},function (data) {
+            if(data == 'true'){
+                console.debug('短信发送成功');
+            }else{
+                alert('手机号码格式错误或异常');
+            }
+       })
     };
+    var hash;
+    jQuery.validator.addMethod("captcha", function(value, element) {
+
+        var h;
+        var v=value;
+        for (var i = v.length - 1, h = 0; i >= 0; --i) {
+            h += v.charCodeAt(i);
+        }
+        //console.debug(hash);
+        return h == hash;
+    }, "请正确填写验证码");
     $().ready(function() {
 // 在键盘按下并释放及提交后验证提交表单
         $("#signupForm").validate({
@@ -179,6 +184,23 @@
                     required: true,
                     minlength: 5,
                     equalTo: "#password"
+                },
+                tel:{
+                  required:true,
+                },
+                checkcode:{
+                    captcha:true,
+                },
+                captcha:{
+                    required:true,
+                    remote:{
+                        url:'<?=\yii\helpers\Url::to(['member/check-tel-code'])?>',
+                        data: {                     //要传递的数据
+                            tel: function() {
+                                return $("#tel").val();
+                            }
+                        }
+                    }
                 },
                 email: {
                     required: true,
@@ -206,6 +228,10 @@
                     minlength: "密码长度不能小于 5 个字符",
                     equalTo: "两次密码输入不一致"
                 },
+                captcha:{
+                    required:'请输入手机验证码',
+                    remote:'验证码错误或过期'
+                },
                 email: "请输入一个正确的邮箱",
                 agree: "请接受我们的声明",
                 topic: "请选择两个主题"
@@ -213,6 +239,21 @@
 
         })
     });
+    $('#change_captcha').click(function () {
+            $.getJSON('<?=\yii\helpers\Url::to(['member/captcha'])?>',{refresh:1},function (data) {
+                    $('#captcha_img').attr('src',data.url);
+                    //console.debug(data.hash1);
+                    hash = data.hash1;
+            })
+    });
+    $('#change_captcha').click();
+    $('#captcha_img').click(function () {
+        $.getJSON('<?=\yii\helpers\Url::to(['member/captcha'])?>',{refresh:1},function (data) {
+            $('#captcha_img').attr('src',data.url);
+
+        })
+    });
+
 </script>
 </body>
 </html>

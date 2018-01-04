@@ -24,6 +24,7 @@ class LoginForm extends Model{
                 //>>密码正确
                 if($this->remember==1){
                     \Yii::$app->user->login($res,24*3600);
+                    //echo 1;die;
                 }else{
                     \Yii::$app->user->login($res);
                 }

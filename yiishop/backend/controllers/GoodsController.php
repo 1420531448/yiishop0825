@@ -148,6 +148,8 @@ class GoodsController extends Controller{
         }
         //>>商品详情
         $content = GoodsIntro::find()->where(['goods_id'=>$id])->one();
+
+        die;
         if($request->isPost){
             $good->load($request->post());
             $content->load($request->post());

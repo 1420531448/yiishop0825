@@ -39,11 +39,15 @@ class GoodsListController extends Controller{
     }
     //>>单个商品信息展示
     public function actionGoodDisplay($id){
+        /*$redis = new \Redis();
+        $redis->connect('127.0.0.1');*/
         $intro = GoodsIntro::find()->where(['goods_id'=>$id])->one();
         $gallerys = GoodsGallery::find()->where(['goods_id'=>$id])->all();
         $row = Goods::find()->where(['id'=>$id])->one();
-        $brand = Brand::find()->where(['id'=>$row->brand_id])->one();
-        $row->brand_id = $brand->name;
+        $brand = Brand::find()->where(['id'=>$row->brand_id])->asArray()->one();
+        $row->brand_id = $brand['name'];
+        $row->view_times =$row->view_times +1;
+        $row->save(false);
         return $this->render('goods',['row'=>$row,'intro'=>$intro,'gallerys'=>$gallerys]);
     }
 }

@@ -11,10 +11,17 @@ return [
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'controllerNamespace' => 'frontend\controllers',
-    'layout'=>false,
+    'layout'=>'header',
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-frontend',
+        ],
+        'sms'=>[
+            'class'=>\frontend\components\Sms::className(),
+            'ak'=>'LTAI6gNdbX23wBLy',
+            'sk'=>'RhScf4uraKyKk2sCDbXNsC1XBeRhUx',
+            'sign'=>'代氏商城',
+            'template'=>'SMS_120125274'
         ],
         'user' => [
             'identityClass' => 'frontend\models\member',
