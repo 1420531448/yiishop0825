@@ -191,9 +191,10 @@
                     <li class="market_price"><span>定价：</span><em>￥<?=$row->market_price?></em></li>
                     <li class="shop_price"><span>本店价：</span> <strong>￥<?=$row->shop_price?></strong> <a href="">(降价通知)</a></li>
                     <li><span>上架时间：</span><?=date('Y-m-d',$row->create_time)?></li>
-                    <li class="star"><span>商品评分：</span> <strong></strong><a href="">(已有<?=$row->view_times?>人评价)</a></li> <!-- 此处的星级切换css即可 默认为5星 star4 表示4星 star3 表示3星 star2表示2星 star1表示1星 -->
+                    <li class="star"><span>商品评分：</span> <strong></strong><a href="">(已有22人评价)</a></li>
+                    <li class="hot"><span>商品热度：</span> <strong></strong><a href="">(已有<?=$row->view_times?>人查看)</a></li> <!-- 此处的星级切换css即可 默认为5星 star4 表示4星 star3 表示3星 star2表示2星 star1表示1星 -->
                 </ul>
-                <form action="" method="post" class="choose">
+                <form action="<?=\yii\helpers\Url::to(['member/add-to-cart'])?>" method="get" class="choose">
                     <ul>
 
                         <li>
@@ -211,6 +212,7 @@
                             <dl>
                                 <dt>&nbsp;</dt>
                                 <dd>
+                                    <input type="hidden" name="goods_id" value="<?=$row->id?>">
                                     <input type="submit" value="" class="add_btn" />
                                 </dd>
                             </dl>

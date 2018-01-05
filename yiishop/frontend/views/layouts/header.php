@@ -24,7 +24,7 @@
         <div class="topnav_right fr">
             <ul>
                 <!-- /*=*/?>-->
-                <li><?=Yii::$app->user->isGuest?'您好':Yii::$app->user->identity->username?>欢迎来到京西！[<a href="<?=\yii\helpers\Url::to(['member/logout'])?>">注销</a>][<a href="<?=\yii\helpers\Url::to(['member/login'])?>">登录</a>] [<a href="<?=\yii\helpers\Url::to(['member/regist'])?>">免费注册</a>] </li>
+                <li><?=Yii::$app->user->isGuest?'您好':Yii::$app->user->identity->username?>欢迎来到京西！<a href="<?=\yii\helpers\Url::to(['member/logout'])?>"><?=Yii::$app->user->isGuest?'':'［注销］'?></a><a href="<?=\yii\helpers\Url::to(['member/login'])?>"><?=Yii::$app->user->isGuest?'［登陆］':''?></a><a href="<?=\yii\helpers\Url::to(['member/regist'])?>"><?=Yii::$app->user->isGuest?'［免费注册］':''?></a> </li>
                 <li class="line">|</li>
                 <li>我的订单</li>
                 <li class="line">|</li>
@@ -111,7 +111,7 @@
         <div class="cart fl">
             <dl>
                 <dt>
-                    <a href="">去购物车结算</a>
+                    <a href="<?=\yii\helpers\Url::to(['member/cart'])?>">去购物车结算</a>
                     <b></b>
                 </dt>
                 <dd>

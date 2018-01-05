@@ -34,7 +34,7 @@
     </div>
     <div class="login_bd">
         <div class="login_form fl">
-            <form action="" method="post">
+            <form id="signupForm" action="" method="post">
                 <ul>
                     <li>
                         <label for="">用户名：</label>
@@ -45,12 +45,12 @@
                         <input type="password" class="txt" name="password" />
                         <a href="">忘记密码?</a>
                     </li>
-                   <!-- <li class="checkcode">
+                    <li class="checkcode">
                         <label for="">验证码：</label>
                         <input type="text"  name="checkcode" />
-                        <img src="/images/checkcode1.jpg" alt="" />
-                        <span>看不清？<a href="">换一张</a></span>
-                    </li>-->
+                        <img id="captcha_img" src="" alt=""  />
+                        <span>看不清？<a id="change_captcha" href="javascript:">换一张</a></span>
+                    </li>
                     <li>
                         <label for="">&nbsp;</label>
                         <input type="checkbox" class="chb" name="remember" value="1"/> 保存登录信息
@@ -114,6 +114,52 @@
     </p>
 </div>
 <!-- 底部版权 end -->
+<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
+<script src="http://static.runoob.com/assets/jquery-validation-1.14.0/dist/jquery.validate.min.js"></script>
+<script src="http://static.runoob.com/assets/jquery-validation-1.14.0/dist/localization/messages_zh.js"></script>
+<script type="text/javascript">
+    $('#change_captcha').click(function () {
+        $.getJSON('<?=\yii\helpers\Url::to(['member/captcha'])?>',{refresh:1},function (data) {
+           // console.debug(data.url);
+            $('#captcha_img').attr('src',data.url);
+            //console.debug(data.hash1);
+            hash = data.hash1;
+        })
+    });
+    $('#change_captcha').click();
+    $('#captcha_img').click(function () {
+        $.getJSON('<?=\yii\helpers\Url::to(['member/captcha'])?>',{refresh:1},function (data) {
+            $('#captcha_img').attr('src',data.url);
 
+        })
+    });
+    var hash;
+    jQuery.validator.addMethod("captcha", function(value, element) {
+
+        var h;
+        var v=value;
+        for (var i = v.length - 1, h = 0; i >= 0; --i) {
+            h += v.charCodeAt(i);
+        }
+        //console.debug(hash);
+        return h == hash;
+    }, "请正确填写验证码");
+    $().ready(function() {
+// 在键盘按下并释放及提交后验证提交表单
+        $("#signupForm").validate({
+            rules: {
+                checkcode:{
+                    captcha:true,
+                },
+
+            },
+            errorElement: "span",
+            messages: {
+
+            }
+
+        })
+    });
+</script>
 </body>
 </html>

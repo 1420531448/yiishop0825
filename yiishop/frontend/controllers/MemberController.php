@@ -1,7 +1,9 @@
 <?php
 
 namespace frontend\controllers;
+use backend\models\Goods;
 use frontend\models\Address;
+use frontend\models\Cart;
 use frontend\models\DetailAddress;
 use frontend\models\LoginForm;
 use frontend\models\Member;
@@ -9,6 +11,7 @@ use frontend\models\SignatureHelper;
 use yii\captcha\Captcha;
 use yii\captcha\CaptchaAction;
 use yii\web\Controller;
+use yii\web\Cookie;
 
 class MemberController extends Controller{
     public $enableCsrfValidation = false;
@@ -33,6 +36,9 @@ class MemberController extends Controller{
         return $this->render('regist');
     }
     //>>验证用户名是否重复
+    /**
+     * @param $username 输入的用户名
+     */
     public function actionCheckUsername($username){
         if(Member::find()->where(['username'=>$username])->one()){
             echo 'false';
@@ -41,6 +47,11 @@ class MemberController extends Controller{
         }
     }
     //>>验证手机验证是否正确
+    /**
+     * @param $captcha 手机验证码
+     * @param $tel 手机号
+     * @return string
+     */
     public function actionCheckTelCode($captcha,$tel){
         $redis = new \Redis();
         $redis->connect('127.0.0.1');
@@ -56,25 +67,55 @@ class MemberController extends Controller{
         }
     }
     //>>登录界面
-    public function actionLogin(){
+    public function actionLogin()
+    {
         $request = \Yii::$app->request;
         $model = new LoginForm();
 
-        if($request->isPost){
-            $model->load($request->post(),'');
+        if ($request->isPost) {
+            $model->load($request->post(), '');
 
-            if($model->validate()){
-                if($model->login()){
+            if ($model->validate()) {
+                if ($model->login()) {
                     //>>登录成功
-                    $user = Member::find()->where(['username'=>$model->username])->one();
+                    $user = Member::find()->where(['username' => $model->username])->one();
                     $user->last_login_time = time();
-                    $user->last_login_ip=$_SERVER['REMOTE_ADDR'];
+                    $user->last_login_ip = $_SERVER['REMOTE_ADDR'];
                     $user->save(false);
+                    //>>已登陆,将cookie信息存入数据表
+                    $cookies = \Yii::$app->request->cookies;
+                    //>>如果cookie里有数据
+                    //var_dump($cookies->has('cart'));die;
+                    if ($cookies->has('cart')) {
+                        //echo 1;die;
+                        $cart_info = unserialize($cookies->getValue('cart'));
+                        $good_ids = array_keys($cart_info);
+                        //>>获得cookie每个商品id
+                        foreach ($good_ids as $good_id) {//1
+                            $count=Cart::find()->where(['goods_id'=>$good_id])->andWhere(['member_id'=>\Yii::$app->user->identity->id])->one();
+                            //>>数据表中该用户购物车有这个商品id就执行数量添加操作
+                            if($count){
+                                //>>有这个商品
+                                $count->amount+=$cart_info[$good_id];
+                                $count->save(false);
+                            }else{
+                                $cart = new Cart();
+                                $cart->member_id = \Yii::$app->user->identity->id;
+                                $cart->goods_id = $good_id;
+                                $cart->amount = $cart_info[$good_id];
+                                $cart->save(false);
+                            }
+                        }
+                        $cookies = \Yii::$app->response->cookies;
+                        $cookies->remove('cart');
+                    }
+
                     echo '登录成功';
                     sleep(1);
                     return $this->redirect('http://www.yiishop.com');
                 }
             }
+
         }
         return $this->render('login');
     }
@@ -85,6 +126,10 @@ class MemberController extends Controller{
         return $this->redirect(['member/login']);
     }
     //>>用户订单地址显示
+    /**
+     * @param $id   用户id
+     * @return string|\yii\web\Response
+     */
     public function actionAddressDisplay($id){
         //>>实例化地址对象和详情地址对象
         $addresses = Address::find()->where(['member_id'=>$id])->all();
@@ -122,7 +167,10 @@ class MemberController extends Controller{
 
         return $this->render('address-add',['addresses'=>$addresses]);
     }
-    //>>用户收货地址修改
+    /**用户收货地址修改
+     * @param $id   地址id
+     * @return string|\yii\web\Response
+     */
     public function actionAddressEdit($id){
         $addresses = Address::find()->where(['member_id'=>\Yii::$app->user->identity->id])->all();
         foreach ($addresses as &$address){
@@ -157,7 +205,10 @@ class MemberController extends Controller{
         //var_dump($addr->status);die;
         return $this->render('address-edit',['addr'=>$addr,'detail'=>$detail,'addresses'=>$addresses]);
     }
-    //>>用户收货地址删除
+    /**用户收货地址删除
+     * @param $id 地址id
+     * @return string
+     */
     public function actionAddressDelete($id){
         $address = Address::find()->where(['id'=>$id])->one();
         $detail = DetailAddress::find()->where(['address_id'=>$address->id])->one();
@@ -170,7 +221,10 @@ class MemberController extends Controller{
         }
 
     }
-    //>>设置默认地址
+    /**设置默认地址
+     * @param $id 地址id
+     * @return \yii\web\Response
+     */
     public function actionAddrDefault($id){
        $addresses = Address::find()->where(['member_id'=>\Yii::$app->user->identity->id])->all();
        //>>状态全部清0
@@ -183,7 +237,10 @@ class MemberController extends Controller{
         $addr->save(false);
         return $this->redirect(['member/address-display','id'=>\Yii::$app->user->identity->id]);
     }
-    //>>用户手机验证码发送
+    /**用户手机验证码发送
+     * @param $tel 手机号
+     * @return string
+     */
     public function actionSendSms($tel)
     {
         //>>电话号码验证
@@ -255,6 +312,145 @@ class MemberController extends Controller{
             );
 
             var_dump($content);*/
+        }
+    }
+    //>>添加商品到购物车
+    public function actionAddToCart($goods_id,$amount){
+
+        if(\Yii::$app->user->isGuest){
+        //>>未登陆 将购物车信息保存至cookie
+            $cookies = \Yii::$app->request->cookies;
+            //>>先读cookie.看商品是否存在
+            if($cookies->has('cart')){
+                //var_dump($cookies->getValue('cart'));die;
+                $cart = unserialize($cookies->getValue('cart'));
+            }else{
+                $cart=[];
+            }
+                //>>判断商品存不存在,不存在就新增,存在就累加
+            if(array_key_exists($goods_id,$cart)){
+                $cart[$goods_id]+=$amount;
+            }else{
+                $cart[$goods_id]=$amount;
+            }
+            //>>写cookie
+                $cookies = \Yii::$app->response->cookies;
+                $cookie = new Cookie();
+                $cookie->name = 'cart';
+                $cookie->value =serialize($cart);
+                //var_dump($cookie);die;
+                $cookies->add($cookie);
+        }else{
+            //>>如果用户已经将这个商品选入购物车
+                $count=Cart::find()->where(['goods_id'=>$goods_id])->andWhere(['member_id'=>\Yii::$app->user->identity->id])->one();
+                if($count){
+                    $count->amount += $amount;
+                    $count->save(false);
+                }else{
+                    //>>登陆后直接将购物车信息存入数据表
+                    $cart = new Cart();
+                    $cart->member_id=\Yii::$app->user->identity->id;
+                    $cart->goods_id = $goods_id;
+                    $cart->amount = $amount;
+                    $cart->save(false);
+                }
+
+            }
+        return $this->redirect(['member/cart']);
+    }
+
+    //>>在结算页面显示购物车的商品
+    public function actionCart(){
+        if(\Yii::$app->user->isGuest){
+            //>>未登录->购物车信息从cookie获取
+            $cookies = \Yii::$app->request->cookies;
+            if($cookies->has('cart')){
+               // var_dump($cookies->getValue('cart'));die;
+                $count = unserialize($cookies->getValue('cart'));
+                $ids =array_keys($count);
+                $goods = Goods::find()->where(['in','id',$ids])->all();
+            }else{
+                return $this->render('cart-error');
+            }
+
+
+        }else{
+            //>>登陆后根据登陆用户id从数据库查表获取购物车信息
+            $carts = Cart::find()->where(['member_id'=>\Yii::$app->user->identity->id])->all();
+            $good_ids = [];
+            //>>获取所有商品id
+            $count=[];
+            foreach($carts as $cart){
+                $good_ids[]=$cart->goods_id;
+                $count[$cart->goods_id]=$cart->amount;
+            }
+            //>>获取所有商品信息
+            $goods = Goods::find()->where(['in','id',$good_ids])->all();
+        }
+        return $this->render('cart',['goods'=>$goods,'count'=>$count]);
+
+    }
+    //>>购物车商品删除
+    /**
+     * @param $id 商品id
+     */
+
+    public function actionCartDelete($id){
+        if(\Yii::$app->user->isGuest){
+            $cookies = \Yii::$app->request->cookies;
+            if($cookies->has('cart')){
+                //>>获取cookie   cart的值
+               $arr = $cookies->getValue('cart');
+               $arr = unserialize($arr);
+                foreach($arr as $g_id=>$count){
+                    if($g_id==$id){
+                       unset($arr[$id]);
+                    }
+                }
+                $cookies = \Yii::$app->response->cookies;
+                $cookie = new Cookie();
+                $cookie->name='cart';
+                $cookie->value =serialize($arr);
+                $cookies->add($cookie);
+                return json_encode(true);
+            }else{
+                return json_encode(false);
+            }
+        }else{
+            $good = Cart::find()->where(['goods_id'=>$id])->andWhere(['member_id'=>\Yii::$app->user->identity->id])->one();
+            $res = $good->delete();
+        }
+        if($res){
+            return json_encode(true);
+        }else{
+            return json_encode(false);
+        }
+    }
+    //>>购物车商品数量修改
+    public function actionCartEdit(){
+        $g_id = \Yii::$app->request->post('g_id');
+        $count=\Yii::$app->request->post('count');
+        if(\Yii::$app->user->isGuest){
+            $cookies = \Yii::$app->request->cookies;
+            if($cookies->has('cart')){
+                   $arr = unserialize($cookies->getValue('cart'));
+                   foreach($arr as $id=>$c){
+                       if($id == $g_id){
+                           $arr[$g_id]=$count;
+                       }
+                   }
+                   $cookies = \Yii::$app->response->cookies;
+                   $cookie = new Cookie();
+                   $cookie->name = 'cart';
+                   $cookie->value = serialize($arr);
+                   $cookies->add($cookie);
+                   return json_encode(true);
+            }
+        }else{
+            $cart = Cart::find()->where(['goods_id'=>$g_id])->andWhere(['member_id'=>\Yii::$app->user->identity->id])->one();
+            $cart->amount = $count;
+            $cart->save(false);
+            return json_encode(true);
         }
     }
     public function actions()

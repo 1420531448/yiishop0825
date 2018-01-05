@@ -5,7 +5,9 @@
 */
 
 $(function(){
-	
+
+
+    $("#total").text(total.toFixed(2));
 	//减少
 	$(".reduce_num").click(function(){
 		var amount = $(this).parent().find(".amount");
@@ -24,6 +26,10 @@ $(function(){
 		});
 
 		$("#total").text(total.toFixed(2));
+
+		//>>减少
+		var g_id=$(this).closest('tr').attr('id')
+		changeNum(g_id,$(amount).val());
 	});
 
 	//增加
@@ -40,6 +46,10 @@ $(function(){
 		});
 
 		$("#total").text(total.toFixed(2));
+
+		//>>增加
+        var g_id=$(this).closest('tr').attr('id')
+        changeNum(g_id,$(amount).val());
 	});
 
 	//直接输入
@@ -58,6 +68,11 @@ $(function(){
 		});
 
 		$("#total").text(total.toFixed(2));
-
+		//>>直接输入
+        var g_id=$(this).closest('tr').attr('id')
+        changeNum(g_id,$(this).val());
 	});
+	var changeNum = function (g_id,count) {
+		$.post('cart-edit',{g_id:g_id,count:count})
+    }
 });
