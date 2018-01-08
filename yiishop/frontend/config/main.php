@@ -24,7 +24,7 @@ return [
             'template'=>'SMS_120125274'
         ],
         'user' => [
-            'identityClass' => 'frontend\models\member',
+            'identityClass' => 'frontend\models\Member',
             'enableAutoLogin' => true,
             'identityCookie' => ['name' => '_identity-frontend', 'httpOnly' => true],
         ],
