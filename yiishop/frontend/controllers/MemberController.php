@@ -115,7 +115,7 @@ class MemberController extends Controller{
 
                     echo '登录成功';
                     sleep(1);
-                    return $this->redirect('http://www.yiishop.com');
+                    return $this->redirect('http://shopdjr.txlly.top');
                 }
             }
 
