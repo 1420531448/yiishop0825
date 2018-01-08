@@ -205,7 +205,7 @@
     $('#delivery_select').on('click','#delivery_id',function () {
         var money=$(this).attr('class_money');
         var total=$('#total li em').html();
-        var pay = total-money;
+        var pay = total+money;
         $('.fillin_ft strong').html('￥'+pay);
     })
 </script>
