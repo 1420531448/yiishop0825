@@ -14,8 +14,13 @@ class GoodsListController extends Controller{
     public function actionDisplay($id='',$serarch=''){
         $request = \Yii::$app->request;
         if($request->isGet){
-            $rows =  Goods::find()->where(['like','name',$serarch])->all();
-            return $this->render('display-index',['rows'=>$rows]);
+            $count = Goods::find()->where(['like','name',$serarch])->count();
+            $pagination =new Pagination([
+                'pageSize'=>4,
+                'totalCount'=>$count,
+            ]);
+            $rows =  Goods::find()->where(['like','name',$serarch])->limit($pagination->limit)->offset($pagination->offset)->all();
+            return $this->render('display-index',['rows'=>$rows,'pagination'=>$pagination]);
         }else{
             //>>查该分类
             $cate = GoodsCategory::find()->where(['id'=>$id])->one();
