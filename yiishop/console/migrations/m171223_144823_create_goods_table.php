@@ -12,6 +12,10 @@ class m171223_144823_create_goods_table extends Migration
      */
     public function up()
     {
+        $tableOptions = null;
+        if ($this->db->driverName === 'mysql') {
+            $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB';
+        }
         $this->createTable('goods', [
             'id' => $this->primaryKey(),
             'name'=>$this->string(20)->notNull()->comment('商品名称'),
@@ -27,7 +31,7 @@ class m171223_144823_create_goods_table extends Migration
             'sort'=>$this->integer()->comment('排序'),
             'create_time'=>$this->integer()->comment('添加时间'),
             'view_times'=>$this->integer()->comment('浏览次数')
-        ]);
+        ],$tableOptions);
     }
 
     /**

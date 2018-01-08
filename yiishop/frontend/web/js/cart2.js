@@ -27,7 +27,7 @@ $(function(){
 		$(".delivery_select").show();
 	})
 
-	$("input[name=delivery]").click(function(){
+	$("input[name=delivery_id]").click(function(){
 		$(this).parent().parent().addClass("cur").siblings().removeClass("cur");
 	});
 
@@ -38,7 +38,7 @@ $(function(){
 		$(".pay_select").show();
 	})
 
-	$("input[name=pay]").click(function(){
+	$("input[name=payment_id]").click(function(){
 		$(this).parent().parent().addClass("cur").siblings().removeClass("cur");
 	});
 

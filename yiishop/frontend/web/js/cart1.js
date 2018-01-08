@@ -6,8 +6,6 @@
 
 $(function(){
 
-
-    $("#total").text(total.toFixed(2));
 	//减少
 	$(".reduce_num").click(function(){
 		var amount = $(this).parent().find(".amount");

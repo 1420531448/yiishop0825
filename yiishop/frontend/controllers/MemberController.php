@@ -7,9 +7,12 @@ use frontend\models\Cart;
 use frontend\models\DetailAddress;
 use frontend\models\LoginForm;
 use frontend\models\Member;
+use frontend\models\Order;
+use frontend\models\OrderGoods;
 use frontend\models\SignatureHelper;
 use yii\captcha\Captcha;
 use yii\captcha\CaptchaAction;
+use yii\db\Exception;
 use yii\web\Controller;
 use yii\web\Cookie;
 
@@ -358,7 +361,6 @@ class MemberController extends Controller{
             }
         return $this->redirect(['member/cart']);
     }
-
     //>>在结算页面显示购物车的商品
     public function actionCart(){
         if(\Yii::$app->user->isGuest){
@@ -390,11 +392,9 @@ class MemberController extends Controller{
         return $this->render('cart',['goods'=>$goods,'count'=>$count]);
 
     }
-    //>>购物车商品删除
-    /**
+    /**购物车商品删除
      * @param $id 商品id
      */
-
     public function actionCartDelete($id){
         if(\Yii::$app->user->isGuest){
             $cookies = \Yii::$app->request->cookies;
@@ -452,6 +452,140 @@ class MemberController extends Controller{
             $cart->save(false);
             return json_encode(true);
         }
+    }
+    //>>用户订单
+    public function actionOrder($id){
+        if(Cart::find()->where(['member_id'=>$id])->one()){
+            //>>用户地址信息
+            $addresses =  Address::find()->where(['member_id'=>$id])->all();
+
+            //>>用户地址详细信息
+            foreach ($addresses as &$address){
+                $detail_addr = DetailAddress::find()->where(['address_id'=>$address->id])->one();
+                $address->detail_address = $detail_addr->detail_address;
+            }
+            //>>用户购物车信息
+            $carts = Cart::find()->where(['member_id'=>$id])->all();
+            $total = 0;
+            $total_price=0;
+            foreach($carts as &$cart){
+                //>>购物车每个商品信息
+                $row = Goods::find()->where(['id'=>$cart->goods_id])->one();
+                $cart->goods=$row;
+                $total+=$cart->amount;
+                $total_price+=$cart->amount*$row->shop_price;
+            }
+            //var_dump($total,$total_price);die;
+            return $this->render('order',['addresses'=>$addresses,'carts'=>$carts,'total'=>$total,'total_price'=>$total_price]);
+        }else{
+            return $this->render('cart-error');
+        }
+
+    }
+    //>>提交订单
+    public function actionSubmitOrder(){
+        if(\Yii::$app->user->isGuest){
+            return $this->redirect(['member/login']);
+        }else{
+            $request =\Yii::$app->request;
+            if(Cart::find()->where(['member_id'=>\Yii::$app->user->id])->one()){
+                //>>获取地址id 和 派送方式id ,付款方式
+                if($request->isPost){
+                    $addr_id = $request->post('address_id');
+                    $deli_id = $request->post('delivery_id');
+                    $pay_id = $request->post('payment_id');
+                    $model = new Order();
+                    $model->member_id=\Yii::$app->user->id;
+                    //>>地址对象
+                    $addr = Address::find()->where(['id'=>$addr_id])->one();
+                    $model->name = $addr->name;
+                    $model->province = $addr->cmbProvince;
+                    $model->city = $addr->cmbCity;
+                    $model->area = $addr->cmbArea;
+                    $model->tel = $addr->tel;
+                    //>>详细地址
+                    $detail = DetailAddress::find()->where(['address_id'=>$addr_id])->one();
+                    $model->address = $detail->detail_address;
+                    //>>派送方式
+                    $model->delivery_id = $deli_id;
+                    $model->delivery_name =Order::$delivery[$deli_id][0];
+                    $model->delivery_price =Order::$delivery[$deli_id][1];
+                    //>>付款方式
+                    $model->payment_id = $pay_id;
+                    $model->payment_name = Order::$payments[$pay_id][0];
+                    $model->create_time = time();
+                    //>>开启事务
+                    $transaction = \Yii::$app->db->beginTransaction();
+                    try{
+                        $model->save(false);
+                        //>>订单商品
+                        $carts = Cart::find()->where(['member_id'=>\Yii::$app->user->id])->all();
+                        $total_order=0;
+                        foreach($carts as $cart){
+                            $model2 = new OrderGoods();
+                            $model2->order_id = $model->id;
+
+                            $model2->goods_id = $cart->goods_id;
+                            $good = Goods::find()->where(['id'=>$cart->goods_id])->one();
+                            if($good->stock>=$cart->amount){
+                                //>>扣减库存
+                                $good->stock-=$cart->amount;
+                                $good->save(false);
+                                //>>订单商品信息
+                                $model2->goods_name = $good->name;
+                                $model2->logo = $good->logo;
+                                $model2->price = $good->shop_price;
+                                $model2->amount = $cart->amount;
+                                $model2->total = $good->shop_price*$cart->amount;
+                                $model2->save(false);
+                                $total_order+=$model2->total;
+                            }else{
+                                //>>抛出异常
+                                throw new Exception('商品库存不足,求修改购物车商品数量');
+                            }
+                        }
+                        //>>订单总计
+                        $model->total = $total_order+$model->delivery_price;
+                        $model->save(false);
+                        //>>清除购物车
+                        $rows = Cart::find()->where(['member_id'=>\Yii::$app->user->id])->all();
+                        foreach ($rows as $row){
+                            $row->delete();
+                        }
+                        //>>提交事务
+                        $transaction->commit();
+                    }catch (Exception $e){
+                        $transaction->rollBack();
+                        echo '商品库存不足';
+                        sleep(1);
+                        return $this->redirect(['member/order','id'=>\Yii::$app->user->id]);
+                    }
+
+                    return $this->redirect(['member/switch']);
+
+                }
+            }else{
+                return $this->render('cart-error');
+            }
+
+        }
+    }
+    //>>提交订单后中专页面展示
+    public function actionSwitch(){
+        return $this->render('order-switch');
+    }
+    //>>已下订单详情
+    public function actionDisplayOrder(){
+        //>>已登录用户所有订单
+        $orders = Order::find()->where(['member_id'=>\Yii::$app->user->id])->all();
+        foreach($orders as $order){
+            //>>查出每条订单的所有商品信息
+            $goods = OrderGoods::find()->where(['order_id'=>$order->id])->all();
+            foreach ($goods as $good){
+                $order->logo=$good->logo;
+            }
+        }
+        return $this->render('order-display',['orders'=>$orders]);
     }
     public function actions()
     {
