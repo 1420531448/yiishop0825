@@ -557,8 +557,7 @@ class MemberController extends Controller{
                     }catch (Exception $e){
                         $transaction->rollBack();
                         echo '商品库存不足';
-                        sleep(1);
-                        return $this->redirect(['member/order','id'=>\Yii::$app->user->id]);
+                        die;
                     }
 
                     return $this->redirect(['member/switch']);
