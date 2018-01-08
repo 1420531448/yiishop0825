@@ -164,16 +164,16 @@
 <!-- 头部 end-->
 
 <div style="clear:both;"></div>
-<?=$content?>
 <script type="text/javascript">
-
     $('#search_content').keyup(function () {
 
         if($('#search_content').val()==''){
             $('#search').prop('disabled','disabled');
         }else{
+            console.debug(123);
             $('#search').prop('disabled','');
         }
     });
-
 </script>
+<?=$content?>
+
