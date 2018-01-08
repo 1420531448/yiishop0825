@@ -245,7 +245,7 @@ class GoodsController extends Controller{
             'upload'=>[
                 'class'=>UEditorAction::className(),
                       'config' => [
-                          "imageUrlPrefix"  => "http://admin.yiishop.com",//图片访问路径前缀
+                          "imageUrlPrefix"  => "http://admindjr.txlly.top",//图片访问路径前缀
                          /* "imagePathFormat" => "/upload/image/{yyyy}{mm}{dd}/{time}{rand:6}" ,//上传保存路径
                           "imageRoot" => \Yii::getAlias("@webroot"),*/
                   ],
