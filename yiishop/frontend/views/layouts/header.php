@@ -47,8 +47,8 @@
         <div class="search fl">
             <div class="search_form">
                 <div class="form_left fl"></div>
-                <form action="<?=\yii\helpers\Url::to(['goods-list/search'])?>" name="search-border" method="get" class="fl">
-                    <input type="text" name="search" class="txt" value="请输入商品关键字" /><input type="submit" class="btn" value="搜索" />
+                <form action="<?=\yii\helpers\Url::to(['goods-list/search'])?>" id="search-border" method="get" class="fl">
+                    <input type="text" id="search_content" name="search" class="txt" placeholder="请输入商品关键字" /><input type="submit"  disabled="" id="search" class="btn" value="搜索" />
                 </form>
                 <div class="form_right fl"></div>
             </div>
@@ -165,3 +165,15 @@
 
 <div style="clear:both;"></div>
 <?=$content?>
+<script type="text/javascript">
+
+    $('#search_content').keyup(function () {
+
+        if($('#search_content').val()==''){
+            $('#search').prop('disabled','disabled');
+        }else{
+            $('#search').prop('disabled','');
+        }
+    });
+
+</script>
