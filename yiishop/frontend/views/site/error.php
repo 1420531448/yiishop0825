@@ -6,7 +6,6 @@
 /* @var $exception Exception */
 
 use yii\helpers\Html;
-$this->context->layout='false';
 $this->title = $name;
 ?>
 

@@ -2,6 +2,7 @@
 namespace frontend\controllers;
 
 use backend\models\GoodsCategory;
+use frontend\actions\ErrorAction;
 use Yii;
 use yii\base\InvalidParamException;
 use yii\web\BadRequestHttpException;
@@ -57,7 +58,7 @@ class SiteController extends Controller
     {
         return [
             'error' => [
-                'class' => 'yii\web\ErrorAction',
+                'class' => ErrorAction::className(),
             ],
             'captcha' => [
                 'class' => 'yii\captcha\CaptchaAction',
