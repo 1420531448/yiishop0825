@@ -35,4 +35,6 @@ class Goods extends ActiveRecord{
         ];
     }
 
+
+
 }

@@ -24,7 +24,7 @@
         <div class="topnav_right fr">
             <ul>
                 <!-- /*=*/?>-->
-                <li><?=Yii::$app->user->isGuest?'您好':Yii::$app->user->identity->username?>欢迎来到京西！<a href="<?=\yii\helpers\Url::to(['member/logout'])?>"><?=Yii::$app->user->isGuest?'':'［注销］'?></a><a href="<?=\yii\helpers\Url::to(['member/login'])?>"><?=Yii::$app->user->isGuest?'［登陆］':''?></a><a href="<?=\yii\helpers\Url::to(['member/regist'])?>"><?=Yii::$app->user->isGuest?'［免费注册］':''?></a> </li>
+                <li id="user_status"><?=Yii::$app->user->isGuest?'您好':Yii::$app->user->identity->username?>欢迎来到京西！<a href="<?=\yii\helpers\Url::to(['member/logout'])?>"><?=Yii::$app->user->isGuest?'':'［注销］'?></a><a href="<?=\yii\helpers\Url::to(['member/login'])?>"><?=Yii::$app->user->isGuest?'［登陆］':''?></a><a href="<?=\yii\helpers\Url::to(['member/regist'])?>"><?=Yii::$app->user->isGuest?'［免费注册］':''?></a> </li>
                 <li class="line">|</li>
                 <li><a href="<?=\yii\helpers\Url::to(['member/display-order'])?>"><?=Yii::$app->user->isGuest?'':'我的订单'?></a></li>
                 <li class="line">|</li>
@@ -174,6 +174,16 @@
             $('#search').prop('disabled','');
         }
     });
+
+    $.getJSON('<?=\yii\helpers\Url::to(['member/user-status'])?>',function(data){
+            if(data.isLogin){
+                $('#user_status').html(data.username+",欢迎来到京西商城 <a href='<?=\yii\helpers\Url::to(['member/logout'])?>'>[注销]</a>");
+            }else{
+                $('#user_status').html('您好,欢迎来到京西商城 <a href="<?=\yii\helpers\Url::to(['member/regist'])?>">[免费注册]</a> <a href="<?=\yii\helpers\Url::to(['member/login'])?>">[登陆]</a>')
+            }
+
+    })
+
 </script>
 <?=$content?>
 

@@ -8,6 +8,7 @@ use backend\models\GoodsCategory;
 use backend\models\GoodsDayCount;
 use backend\models\GoodsGallery;
 use backend\models\GoodsIntro;
+use frontend\controllers\GoodsListController;
 use kucha\ueditor\UEditorAction;
 use Qiniu\Auth;
 use Qiniu\Storage\UploadManager;
@@ -95,7 +96,21 @@ class GoodsController extends Controller{
                 $model->create_time = time();
                 $model->save(false);
                 $content->goods_id = $model->id;
-                $content->save(false);
+                $res = $content->save(false);
+                //>>============生成静态页面=================
+                if($res){
+                    $intro = GoodsIntro::find()->where(['goods_id' => $model->id])->one();
+                    $gallerys = GoodsGallery::find()->where(['goods_id' => $model->id])->all();
+                    $row = Goods::find()->where(['id' => $model->id])->one();
+                    $brand = Brand::find()->where(['id' => $model->brand_id])->asArray()->one();
+                    $row->brand_id = $brand['id'];
+                    $row->view_times = $row->view_times + 1;
+                    $row->save(false);
+                    //>>获取页面内容生成静态页面
+                    $contents = $this->renderPartial('goods', ['row' => $row, 'intro' => $intro, 'gallerys' => $gallerys]);
+                    file_put_contents(\Yii::getAlias('@frontend/web').'/goods_'.$row->id.'.html',$contents,$contents);
+                }
+                //>>============================================
                 \Yii::$app->session->setFlash('success','添加商品信息成功');
                 return $this->redirect(['goods/index']);
             }
@@ -153,8 +168,23 @@ class GoodsController extends Controller{
             $content->load($request->post());
             if($good->validate()){
                 $good->save();
-                $content->save(false);
+                $res = $content->save(false);
+                //>>============生成静态页面=================
+                if($res){
+                    $intro = GoodsIntro::find()->where(['goods_id' => $id])->one();
+                    $gallerys = GoodsGallery::find()->where(['goods_id' => $id])->all();
+                    $row = Goods::find()->where(['id' => $id])->one();
+                    $brand = Brand::find()->where(['id' => $row->brand_id])->asArray()->one();
+                    $row->brand_id = $brand['name'];
+                    $row->view_times = $row->view_times + 1;
+
+                    //>>获取页面内容生成静态页面
+                    $contents = $this->renderPartial('goods', ['row' => $row, 'intro' => $intro, 'gallerys' => $gallerys]);
+                    file_put_contents(\Yii::getAlias('@frontend/web').'/goods_'.$id.'.html',$contents);
+                }
+                //>>============================================
                 \Yii::$app->session->setFlash('success','修改成功');
+
                 return $this->redirect(['goods/index']);
             }
         }else{

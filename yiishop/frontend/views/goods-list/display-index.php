@@ -286,8 +286,8 @@
             <ul>
                 <li>
                     <dl>
-                        <dt><a href="<?=\yii\helpers\Url::to(['goods-list/good-display','id'=>$row->id])?>"><img src="<?=$row->logo?>" alt="" /></a></dt>
-                        <dd><a href="<?=\yii\helpers\Url::to(['goods-list/good-display','id'=>$row->id])?>"><?=$row->name?></a></dt>
+                        <dt><a href="<?=\yii\helpers\Url::to(['@web/goods_'.$row->id.'.html'])?>"><img src="<?=$row->logo?>" alt="" /></a></dt>
+                        <dd><a href="<?=\yii\helpers\Url::to(['@web/goods_'.$row->id.'.html'])?>"><?=$row->name?></a></dt>
                         <dd><strong>￥<?=$row->shop_price?></strong></dt>
                         <dd><a href=""><em>已有10人评价</em></a></dt>
                     </dl>

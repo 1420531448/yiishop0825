@@ -11,8 +11,8 @@ use yii\web\Controller;
 
 class GoodsListController extends Controller
 {
-
-    public function actionDisplay($id = '')
+    //>>根据点击商品分类展示该分类和子孙分类下的商品信息
+    public function actionDisplay($id)
     {
         //>>查该分类
         $cate = GoodsCategory::find()->where(['id' => $id])->one();
@@ -42,21 +42,7 @@ class GoodsListController extends Controller
 
     }
 
-    //>>单个商品信息展示
-    public function actionGoodDisplay($id)
-    {
-        /*$redis = new \Redis();
-        $redis->connect('127.0.0.1');*/
-        $intro = GoodsIntro::find()->where(['goods_id' => $id])->one();
-        $gallerys = GoodsGallery::find()->where(['goods_id' => $id])->all();
-        $row = Goods::find()->where(['id' => $id])->one();
-        $brand = Brand::find()->where(['id' => $row->brand_id])->asArray()->one();
-        $row->brand_id = $brand['name'];
-        $row->view_times = $row->view_times + 1;
-        $row->save(false);
-        return $this->render('goods', ['row' => $row, 'intro' => $intro, 'gallerys' => $gallerys]);
-    }
-
+    //>>商品搜索
     public function actionSearch($search)
     {
             $count = Goods::find()->where(['like','name',$search])->count();
@@ -66,6 +52,20 @@ class GoodsListController extends Controller
             ]);
             $rows = Goods::find()->where(['like', 'name', $search])->limit($pagination->limit)->offset($pagination->offset)->all();
             return $this->render('display-index', ['rows' => $rows, 'pagination' => $pagination]);
+    }
+    //>>商品点击数(高并发下)
+    public function actionHit($id){
+        $redis = new \Redis();
+        $redis->connect('127.0.0.1');
+        if($redis->get('times_'.$id)==false){
+            $redis->set('times_'.$id,1);
+            $res = $redis->get('times_'.$id);
+        }else{
+            $res = $redis->incr('times_'.$id);
+        }
+
+
+        return json_encode($res);
     }
 
 }

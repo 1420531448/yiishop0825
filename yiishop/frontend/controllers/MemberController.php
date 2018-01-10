@@ -38,6 +38,20 @@ class MemberController extends Controller{
         }
         return $this->render('regist');
     }
+    //>>用户登陆状态ajax
+    public function actionUserStatus(){
+        $result=[
+            'isLogin'=>'',
+            'username'=>''
+        ];
+        if(\Yii::$app->user->isGuest){
+            $result['isLogin']=false;
+        }else{
+            $result['isLogin']=true;
+            $result['username']=\Yii::$app->user->identity->username;
+        }
+        return json_encode($result);
+    }
     //>>验证用户名是否重复
     /**
      * @param $username 输入的用户名
@@ -246,22 +260,32 @@ class MemberController extends Controller{
      */
     public function actionSendSms($tel)
     {
-        //>>电话号码验证
-        //>>使用正则
-        if (preg_match("/^1[34578]{1}\d{9}$/", $tel)) {
-            $code = rand(10000, 99999);
-            $res = \Yii::$app->sms->send($tel, ['code' => $code]);
-            if ($res->Code == 'OK') {
-                //>>发送成功
-                //>>将验证码存入redis以便验证
-                $redis = new \Redis();
-                $redis->connect('127.0.0.1');
-                $redis->set('code_' . $tel, $code, 300);
-                return 'true';
-            } else {
+        $redis = new \Redis();
+        $redis->connect('127.0.0.1');
+        //>>获取key的剩余有效时间
+
+            //>>电话号码验证
+            //>>使用正则
+          /*  $ttl = $redis->ttl('code_'.$tel);//>> time()-$ttl > 240
+            if($ttl && $ttl>240){
+                echo '距离上次发送短信未超过1分钟,请稍后再试';
+                die;
+            }*/
+            if (preg_match("/^1[34578]{1}\d{9}$/", $tel)) {
+                $code = rand(10000,99999);
+                $res = \Yii::$app->sms->send($tel, ['code' => $code]);
+                if ($res->Code == 'OK') {
+                    //>>发送成功
+                    //>>将验证码存入redis以便验证
+                    $redis->set('code_' . $tel, $code, 300);
+                    return 'true';
+                }
+            }else {
                 //>>发送失败
                 return '手机号码格式错误或异常';
-            }
+
+             }
+
 
 
             /*$params = array ();
@@ -315,7 +339,7 @@ class MemberController extends Controller{
             );
 
             var_dump($content);*/
-        }
+
     }
     //>>添加商品到购物车
     public function actionAddToCart($goods_id,$amount){
@@ -524,7 +548,6 @@ class MemberController extends Controller{
                         foreach($carts as $cart){
                             $model2 = new OrderGoods();
                             $model2->order_id = $model->id;
-
                             $model2->goods_id = $cart->goods_id;
                             $good = Goods::find()->where(['id'=>$cart->goods_id])->one();
                             if($good->stock>=$cart->amount){
@@ -554,6 +577,13 @@ class MemberController extends Controller{
                         }
                         //>>提交事务
                         $transaction->commit();
+                        $member = Member::find()->where(['id'=>\Yii::$app->user->id])->one();
+                        \Yii::$app->mailer->compose()
+                            ->setFrom('18345971383@163.com')
+                            ->setTo($member->email)
+                            ->setSubject('订单提交成功')
+                            ->setHtmlBody('<span style="color:red;">订单提交成功</span>')
+                            ->send();
                     }catch (Exception $e){
                         $transaction->rollBack();
                         echo '商品库存不足';
@@ -585,6 +615,68 @@ class MemberController extends Controller{
             }
         }
         return $this->render('order-display',['orders'=>$orders]);
+    }
+    //>>清理过期未支付订单
+    public function actionCleanOrder(){
+        //>>3小时之内未支付订单过期
+        /**
+         * time() > create_time 创建时间  + 3*3600
+         */
+        $orders = Order::find()->where(['status'=>1])->andWhere(['<','create_time',time()-10])->all();
+        //>>每条订单
+        if($orders){
+            foreach($orders as $order){
+                $order->status = 0;
+                $order->save(false);
+                $goods = OrderGoods::find()->where(['order_id'=>$order->id])->all();
+                //>>每个订单的商品
+                foreach($goods as $good){
+                    $detail = Goods::find()->where(['id'=>$good->goods_id])->one();
+                    $detail->stock += $good->amount;
+                    $detail->save(false);
+                }
+            }
+        }
+
+    }
+    //>>解决超卖
+    public function actionOverTop(){
+        /**
+         *  $redis = new \Redis();
+         *   $redis->connect('127.0.0.1');
+         *   事先将活动商品的库存和id存入redis
+         *   在订单保存之后
+         *   $order->save()
+         *   遍历提交订单用户的购物车中的商品信息并根据商品id在redis中减去
+         *    $res=$redis->decrBy('stock_'.$cart->goods_id,$cart->amount)
+         *    在redis中用哈希类型保存id=>count 以便redis中商品数量不够回滚
+         *      $redis->hSet('reduce_'.$order->id,$cart->goods_id,$cart->amount);
+         *      if($res<0){
+                    商品不足抛出异常
+         * }else{
+                提交订单  保存订单数据
+         * }
+         * 异常处理
+         *  catch{
+         *      捕获到异常->redis中商品数量不足->回滚
+         *      获取redis里该订单的商品id和数量
+         *      $reduces = $redis->hGetAll('reduce_'.$order->id)
+         *
+         *      foreach($reduces as $id=>$num){
+         *              $redis->incrBy('stock_'.$id,$num)
+         *      }
+         * }
+         */
+
+    }
+    //>>邮件发送
+    public function actionEmail(){
+        \Yii::$app->mailer->compose()
+             ->setFrom('18345971383@163.com')
+             ->setTo('1420531448@qq.com')
+             ->setSubject('试验')
+             ->setHtmlBody('<span style="color:red;">试验成功</span>')
+             ->send();
     }
     public function actions()
     {
