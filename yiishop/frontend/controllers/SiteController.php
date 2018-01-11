@@ -89,12 +89,17 @@ class SiteController extends Controller
                 $three[$second->id]=$thirds;
             }
         }*/
+        return $this->render('@webroot/index.html');
+    }
+    /**
+     * 首页静态页面生成
+     *
+     */
+    public function actionProductIndex(){
         $contents =  $this->render('index');
         file_put_contents('index.html',$contents);
         echo '首页静态化完成';
-        return $this->render('@webroot/index.html');
     }
-
     /**
      * Logs in a user.
      *
