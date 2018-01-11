@@ -2,6 +2,7 @@
 namespace frontend\controllers;
 
 use backend\models\GoodsCategory;
+use common\models\SphinxClient;
 use frontend\actions\ErrorAction;
 use Yii;
 use yii\base\InvalidParamException;
@@ -99,6 +100,26 @@ class SiteController extends Controller
         $contents =  $this->renderPartial('index');
         file_put_contents('index.html',$contents);
         echo '首页静态化完成';
+    }
+    /**
+     * 分词搜索测试
+     */
+    public function actionSearch(){
+
+        $cl = new SphinxClient();
+        $cl->SetServer ( '127.0.0.1', 9312);
+//$cl->SetServer ( '10.6.0.6', 9312);
+//$cl->SetServer ( '10.6.0.22', 9312);
+//$cl->SetServer ( '10.8.8.2', 9312);
+        $cl->SetConnectTimeout ( 10 );
+        $cl->SetArrayResult ( true );
+// $cl->SetMatchMode ( SPH_MATCH_ANY);
+        $cl->SetMatchMode ( SPH_MATCH_EXTENDED2);
+        $cl->SetLimits(0, 1000);
+        $info = '电xx';
+        $res = $cl->Query($info, 'mysql');//shopstore_search
+//print_r($cl);
+        print_r($res);
     }
     /**
      * Logs in a user.

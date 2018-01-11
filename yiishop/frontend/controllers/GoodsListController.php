@@ -6,6 +6,7 @@ use backend\models\Goods;
 use backend\models\GoodsCategory;
 use backend\models\GoodsGallery;
 use backend\models\GoodsIntro;
+use common\models\SphinxClient;
 use yii\data\Pagination;
 use yii\web\Controller;
 
@@ -45,12 +46,34 @@ class GoodsListController extends Controller
     //>>商品搜索
     public function actionSearch($search)
     {
-            $count = Goods::find()->where(['like','name',$search])->count();
-            $pagination = new Pagination([
-                'pageSize' => 4,
-                'totalCount' => $count,
-            ]);
-            $rows = Goods::find()->where(['like', 'name', $search])->limit($pagination->limit)->offset($pagination->offset)->all();
+
+            //>>==================分词搜索===========================
+                $cl = new SphinxClient();
+                $cl->SetServer ( '127.0.0.1', 9312);
+        //$cl->SetServer ( '10.6.0.6', 9312);
+        //$cl->SetServer ( '10.6.0.22', 9312);
+        //$cl->SetServer ( '10.8.8.2', 9312);
+                $cl->SetConnectTimeout ( 10 );
+                $cl->SetArrayResult ( true );
+        // $cl->SetMatchMode ( SPH_MATCH_ANY);
+                $cl->SetMatchMode ( SPH_MATCH_EXTENDED2);
+                $cl->SetLimits(0, 1000);
+                $info = $search;
+                $res = $cl->Query($info, 'mysql');//shopstore_search
+        //print_r($cl);
+                $ids = [];
+                if(isset($res['matches'])){
+                        foreach ($res['matches'] as $match){
+                                $ids[] = $match['id'];
+                        }
+                }
+            //>>=====================================================
+        $count = $res['total'];
+        $pagination = new Pagination([
+            'pageSize' => 4,
+            'totalCount' => $count,
+        ]);
+            $rows = Goods::find()->where(['in', 'id', $ids])->limit($pagination->limit)->offset($pagination->offset)->all();
             return $this->render('display-index', ['rows' => $rows, 'pagination' => $pagination]);
     }
     //>>商品点击数(高并发下)
