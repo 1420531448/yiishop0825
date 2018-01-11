@@ -96,7 +96,7 @@ class SiteController extends Controller
      *
      */
     public function actionProductIndex(){
-        $contents =  $this->render('index');
+        $contents =  $this->renderPartial('index');
         file_put_contents('index.html',$contents);
         echo '首页静态化完成';
     }
